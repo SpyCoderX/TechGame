@@ -14,28 +14,37 @@ class LivingEntity(Entity):
         self.__health = health
         self.__maxHealth = health
 
-    def damage(self,amount):
-        self.__change_health(-amount)
-    def heal(self,amount):
-        self.__change_health(amount)
 
+        # Modification of health
+    def damage(self,amount):
+        self.__change_health(min(-amount,0))
+
+    def heal(self,amount):
+        self.__change_health(max(amount,))
+
+
+        # Get/Set health
     def setHealth(self,amount:int):
         self.__setHealth(amount)
+
     def getHealth(self):
         return self.__health
     
+
+        # Get/set max health
     def setMaxHealth(self,amount:int):
         self.__maxHealth = max(amount,1)
         self.__setHealth(self.__health)
+
     def getMaxHealth(self):
         return self.__maxHealth
 
-    
+
+
+        # Instant kill with damage
     def kill(self):
         self.damage(2**64)
-    def death(self):
-        self.__list.remove(self)
-        del self
+    
 
         # Functions that handle the manipulation of the health variables. This allows for built-in checks to detect if the entity dies.
     def __change_health(self,a):
@@ -44,5 +53,5 @@ class LivingEntity(Entity):
     def __setHealth(self,a):
         self.__health= max(min(a,self.__maxHealth),0)
         if self.__health==0:
-            self.death()
+            self.delete()
         

@@ -13,17 +13,18 @@ app.exec()
 """ 
 Add more code to:
 
-Entity
+Entity 20%
 LivingEntity
 Item
 Tile
 BaseEnemy
-Player
+Player 2%
 
 
 Create:
 
-Camera.py
+Camera.py - DONE
+
 PauseUI.py
 OverlayUI.py
 StartMenuUI.py

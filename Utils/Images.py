@@ -9,8 +9,11 @@ from Widgets.Game.Entity.LivingEntity import LivingEntity
 import os
 from Utils.Errors import ImageLoadError,ImageError
 
+def convertToImagePath(str):
+    return "/Images/"+str+".png"
+
 def load(s:str) -> QImage:
-    s = "/Images/"+s+".png"
+    s = convertToImagePath(s)
     if os.path.isfile(s):
         return QImage(fileName=s)
     else:
@@ -18,3 +21,18 @@ def load(s:str) -> QImage:
 
 def default():
     return load("Default")
+
+class Anim:
+    def __init__(self,id) -> None:
+
+        self.__images = []
+
+        loading = True
+        num = 0
+        while loading:
+            if not os.path.isfile(convertToImagePath(id+"_"+str(num))):
+                loading = False
+                break
+            self.__images.append(load(id+"_"+str(num)))
+    def images(self):
+        return self.__images
