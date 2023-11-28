@@ -6,7 +6,6 @@ from PyQt6.QtWidgets import *
 from Widgets.Base import Object,Widget
 from Utils.Numbers import *
 from Utils import Images
-
 class Entity(Object):
     def __init__(self,img:QImage):
         super().__init__()
