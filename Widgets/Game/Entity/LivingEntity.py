@@ -7,7 +7,7 @@ from PyQt6.QtGui import QImage
 from PyQt6.QtWidgets import *
 from Widgets.Base import Object,Widget
 from Utils.Numbers import Loc
-from Widgets.Game.Entity.Entity import Entity
+from . import Entity
 class LivingEntity(Entity):
     def __init__(self, img: QImage,health):
         super().__init__(img)

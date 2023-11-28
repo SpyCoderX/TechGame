@@ -2,11 +2,10 @@ import sys
 from PyQt6.QtCore import *
 from PyQt6.QtGui import *
 from PyQt6.QtWidgets import *
-from Widgets.Window import Base 
-
+from Widgets.Window import BaseW 
 
 app = QApplication(sys.argv)
-B = Base()
+B = BaseW()
 B.show()
 app.exec()
 
@@ -14,8 +13,8 @@ app.exec()
 Add more code to:
 
 Entity 20%
-LivingEntity
-Item
+LivingEntity - what am i doing with this again?
+Item - #copy() #setImg() #setName() #setRarity() #name() #img() #rarity()
 Tile
 BaseEnemy
 Player 2%
@@ -33,5 +32,4 @@ Layer.py (Current layer/level (Normal/parallel))
 LevelLoader.py (Level loader, loads from a built-in set of levels)
 Levels/Level-<number>.json (The built-in levels)
 Level.py
-Tiles/__init__.py (The level, so this NEEDS to be made)
 """

@@ -1,6 +1,14 @@
 from PyQt6.QtCore import *
 from PyQt6.QtGui import *
 from typing import overload
+
+
+def centerImage(Point:QPoint,Image:QImage):
+    return QPointF(Point.x()-Image.width()/2,Point.y()-Image.height()/2)
+
+def cnvrtLstToQPntF(list): #Convert List To QPointF (Convert Cnvrt, List Lst, To To, QPointF QPntf)
+    return QPointF(list[0],list[1])
+
 class Loc(QPointF):
     R = 0
     @overload
@@ -11,6 +19,7 @@ class Loc(QPointF):
     def __init__(self,P:QPoint,Rot:float) -> None: ...
 
     def __init__(self,a,b,c):
+        super().__init__()
         if isinstance(a,QPoint) or isinstance(a,QPointF):
             """Creates a point with an x-position, y-position, and rotation."""
             self.setX(a.x)
@@ -34,6 +43,10 @@ class Loc(QPointF):
     def subtractPoint(self,a:QPointF):
         b = Loc(self.x()-a.x(),self.y()-a.y(),self.R)
         return b
+    def toVec(self):
+        return Vector2D(self.x(),self.y())
+    def getList(self):
+        return [self.x(),self.y()]
 class Vector2D(QVector2D):
     def setAll(self,x,y):
         self.setX(x)

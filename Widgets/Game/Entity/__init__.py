@@ -1,5 +1,7 @@
+from typing import List
+from Widgets.Game.Entity.Entity import Entity
 class EntityList:
-    
+    __LIST: List[Entity]
     def __init__(self) -> None:
         self.__LIST = []
     
@@ -21,11 +23,14 @@ class EntityList:
         self.__LIST = []
 
 
-    def update(self,screen):
+    def update(self,game):
         for e in self.__LIST:
-            e.update(screen)
+            e.update(game)
 
 
-    def render(self,screen):
+    def render(self,game):
         for e in self.__LIST:
-            e.render(screen)
+            e.render(game)
+
+    def contains(self,entity) -> bool:
+        return self.__LIST.count(entity)>0

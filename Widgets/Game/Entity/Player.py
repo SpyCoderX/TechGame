@@ -11,7 +11,7 @@ import os
 # Importing PyQt6 stuff, and the other files.
 
 class Player(LivingEntity):
-    def __init__(self):
+    def __init__(self,health):
         self.__idle_images = Anim("PlayerIdle") # Idle Animation
-        self.__walking_images = Anim("WalkingIdle")
-        super().__init__(self.__idle_images[0]) # Sets up the entity. Uses the first image in __idle_images as the base image in the entity.
+        self.__walking_images = Anim("PlayerWalk") # Walking Animation
+        super().__init__(self.__idle_images.images()[0],health) # Sets up the entity. Uses the first image in __idle_images as the base image in the entity.

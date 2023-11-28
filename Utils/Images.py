@@ -3,21 +3,21 @@ from PyQt6 import QtCore, QtGui
 from PyQt6.QtCore import *
 from PyQt6.QtGui import *
 from PyQt6.QtWidgets import *
-from Widgets.Base import Object,Widget
-from Utils.Numbers import Loc
-from Widgets.Game.Entity.LivingEntity import LivingEntity
 import os
 from Utils.Errors import ImageLoadError,ImageError
 
 def convertToImagePath(str):
-    return "/Images/"+str+".png"
+    return "Images\\"+str+".png"
 
 def load(s:str) -> QImage:
     s = convertToImagePath(s)
     if os.path.isfile(s):
-        return QImage(fileName=s)
+        return QImage(s)
     else:
-        raise ImageLoadError("Unable to find image \""+s+"\"")
+        if s == convertToImagePath("Default"):
+            raise ImageLoadError("DEFAULT IMAGE DOES NOT EXIST")
+        print("Unable to find image \""+s+"\"")
+        return default()
 
 def default():
     return load("Default")
@@ -34,5 +34,8 @@ class Anim:
                 loading = False
                 break
             self.__images.append(load(id+"_"+str(num)))
+        
     def images(self):
+        if len(self.__images)==0:
+            self.__images = [default()]
         return self.__images

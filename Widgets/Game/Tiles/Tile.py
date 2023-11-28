@@ -1,13 +1,108 @@
+from .TileHelp import TileDictionary
+from PyQt6.QtCore import *
+from PyQt6.QtGui import *
+from Utils.Numbers import centerImage
+from .TileVARS import *
+
+
+class TileBuilder:
+    def __init__(self,id,floor) -> None:
+        self.__id = id
+        self.__floor = floor
+        self.__coll:int= None
+    def setCollision(self,c:int):
+        self.__coll = c
+        return self
+    def build(self):
+        # Add code for custom tiles, like the "stair" tile.
+        tile = Tile(self.__id,self.__floor)
+        if self.__coll!=None:
+            tile.setCollision(self.__coll)
+        return tile
+
+# Tile - The basis of the tile-map system. 
 class Tile:
-    def __init__(self,s,pos) -> None:
-        self.__id = s
-        self.__pos = list(pos)
-        self.__icon = None # Add a custom object called "Icon" which has an image to render in the render function.
+    __id = "air"
+    __floor = "air"
+    def __init__(self,id,floor) -> None:
+        if id != None:
+            self.__id = id # Tile ID, default is "air"
+        if floor != None:
+            self.__floor = floor
+        self.__pos = (0,0) # Position in the TileMap
+        self.__icon =  TileDictionary.getTileImg(self.__id) # Icon
+        self.__floorIcon =  TileDictionary.getTileImg(self.__floor)
+        self.__collisionStatus:int = NO_COLLISION # Collision Status
 
-    def update(self,screen):
+
+    # Get Collision state
+    def collision(self):
+        return self.__collisionStatus
+    
+
+    # Set Collosion state
+    def setCollision(self,c:int):
+        self.__collisionStatus = c
+
+
+    # Tile Grid/map position
+    def pos(self):
+        return self.__pos
+    
+
+    # Set Tile Grid/map Position
+    def setPos(self,pos):
+        self.__pos = tuple(pos)
+
+
+    # Get ID
+    def ID(self):
+        return self.__id
+
+    # Set ID
+    def setID(self,ID):
+        self.__id = ID
+        self.__icon = TileDictionary.getTileImg(self.__id)
+
+    # Get Floor ID
+    def floorID(self):
+        return self.__floor
+    
+    # Set Floor ID
+    def setFloorID(self,ID):
+        self.__floor = ID
+        self.__floorIcon = TileDictionary.getTileImg(self.__floor)
+
+
+    # Update
+    def update(self,game): # This function allows other tiles to do custom ticking, like a torch flickering, or a camera looking at the player.
         pass
-    # Leave this be, different tiles will override this.
+    
 
-    def render(self,screen):
-        pass 
-    # Add rendering code
+    # Rendering code
+    def render(self,game):
+        oldPos = self.pos()
+        camPos = game.camera.pos()
+        camPos = [camPos.x(),camPos.y()]
+        pos = [oldPos[x]*SIZE-camPos[x] for x in range(2)]
+        fIcon = self.iconFloor() # Floor Icon
+        game.rScreen.getThisPainter().drawImage(centerImage(QPointF(pos[0],pos[1]),fIcon),fIcon)
+        icon = self.icon()
+        game.rScreen.getThisPainter().drawImage(centerImage(QPointF(pos[0],pos[1]),icon),icon)
+    
+
+    # Overlay for say, a cannon to allow the cannon to render on top of nearby tiles without clipping.
+    def overlay(self,game):
+        pass
+
+    def icon(self):
+        return self.__icon
+    def iconFloor(self):
+        return self.__floorIcon
+    
+    def copy(self):
+        t = Tile(self.ID(),self.floorID())
+        t.setPos(self.pos())
+        t.setCollision(self.collision)
+        return t
+    

@@ -15,7 +15,11 @@ class Screen(Widget):
         l = QStackedLayout()
         l.addWidget(self.game)
         self.setLayout(l)
+        self.keys = {"w":False,"a":False,"s":False,"d":False}
+        self.key_presses = []
+
         
     def paintEvent(self, a0: QPaintEvent) -> None:
         self.game.tick(self)
+    
     
