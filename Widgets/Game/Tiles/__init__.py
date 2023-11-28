@@ -118,7 +118,7 @@ class TileMap:
         start = [max(min(start[0],len(self.__TILES[0])-1),0),max(min(start[1],len(self.__TILES)-1),0)]
         sPos = game.camera.size() # Camera Size
         sPos = [sPos[0]+Pos[0],sPos[1]+Pos[1]]
-        end = [math.ceil(sPos[x]/SIZE) for x in range(2)]
+        end = [math.ceil(sPos[x]/SIZE+1) for x in range(2)]
         end = [max(min(end[0],len(self.__TILES[0])-1),0),max(min(end[1],len(self.__TILES)-1),0)]
         return [[start[0],start[1]],[end[0],end[1]]]
 

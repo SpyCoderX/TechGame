@@ -7,9 +7,9 @@ from Widgets import Ticker,Screen,Base
 class BaseW(QMainWindow,Base.Widget):
     def __init__(self) -> None:
         super().__init__()
+        self.setWindowTitle("Parallel Processing")
         self.setBaseSize(1200,800)
         self.timer = Ticker.Ticker(self)
-        self.setWindowTitle("Widgets App")
         screen = Screen.Screen()
         self.cscreen = screen
         self.setCentralWidget(screen)

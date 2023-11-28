@@ -34,6 +34,7 @@ class Anim:
                 loading = False
                 break
             self.__images.append(load(id+"_"+str(num)))
+            num+=1
         
     def images(self):
         if len(self.__images)==0:
