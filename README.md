@@ -15,5 +15,5 @@ Ion Drive is a game I made a long time ago, and I am remaking it from scratch.
 (New) You are an explorer, but you have gotten lost in an ancient maze. You're only hope is to navigate the maze with your trusty compass and a strange parallel universe.
 
 ## **Status**
-Currently waiting for theme of this project to be decided. More info will be posted on Monday, Nov 27.
+Under Development / Comming soon.
 
