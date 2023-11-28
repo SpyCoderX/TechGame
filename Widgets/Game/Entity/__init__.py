@@ -1,14 +1,17 @@
 from typing import List
 from Widgets.Game.Entity.Entity import Entity
+from Utils.AABB import AABBTree
 class EntityList:
     __LIST: List[Entity]
     def __init__(self) -> None:
         self.__LIST = []
+        self.tree = AABBTree()
     
 
-    def add_entity(self,entity):
+    def add_entity(self,entity:Entity):
         entity.setList(self)
         self.__LIST.append(entity)
+        self.tree.add(entity.getAB(),entity)
 
 
     def remove_entity(self,entity):
@@ -26,6 +29,7 @@ class EntityList:
     def update(self,game):
         for e in self.__LIST:
             e.update(game)
+            self.tree.update(e.ABBox,e)
 
 
     def render(self,game):

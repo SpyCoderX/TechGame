@@ -3,7 +3,7 @@ from PyQt6.QtGui import *
 
 class Cam:
     def __init__(self,pos:QPointF) -> None:
-        self.__pos = pos
+        self.__pos = QPointF(pos.x()-500,pos.y()-500)
         self.__size = [64,64]
     
     def setPos(self,pos:QPointF):

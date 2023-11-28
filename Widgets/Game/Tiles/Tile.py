@@ -5,20 +5,6 @@ from Utils.Numbers import centerImage
 from .TileVARS import *
 
 
-class TileBuilder:
-    def __init__(self,id,floor) -> None:
-        self.__id = id
-        self.__floor = floor
-        self.__coll:int= None
-    def setCollision(self,c:int):
-        self.__coll = c
-        return self
-    def build(self):
-        # Add code for custom tiles, like the "stair" tile.
-        tile = Tile(self.__id,self.__floor)
-        if self.__coll!=None:
-            tile.setCollision(self.__coll)
-        return tile
 
 # Tile - The basis of the tile-map system. 
 class Tile:
@@ -49,6 +35,10 @@ class Tile:
     def pos(self):
         return self.__pos
     
+
+    def gPos(self):
+        return QPointF(self.pos()[0]*SIZE,self.pos()[1]*SIZE)
+
 
     # Set Tile Grid/map Position
     def setPos(self,pos):
@@ -101,8 +91,26 @@ class Tile:
         return self.__floorIcon
     
     def copy(self):
-        t = Tile(self.ID(),self.floorID())
+        t = TileBuilder(self.ID(),self.floorID()).build()
         t.setPos(self.pos())
-        t.setCollision(self.collision)
         return t
     
+class Solid(Tile):
+    def __init__(self, id, floor) -> None:
+        super().__init__(id, floor)
+        self.setCollision(SOLID)
+    
+class TileBuilder:
+    def __init__(self,id,floor) -> None:
+        self.__id = id
+        self.__floor = floor
+    def build(self):
+        # Add code for custom tiles, like the "stair" tile.
+        if self.__id=="stone":
+            tile = Solid(self.__id,self.__floor)
+        else:
+            tile = Tile(self.__id,self.__floor)
+        
+        # if self.__coll!=None:
+        #     tile.setCollision(self.__coll)
+        return tile

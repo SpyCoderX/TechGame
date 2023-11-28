@@ -15,3 +15,7 @@ class Player(LivingEntity):
         self.__idle_images = Anim("PlayerIdle") # Idle Animation
         self.__walking_images = Anim("PlayerWalk") # Walking Animation
         super().__init__(self.__idle_images.images()[0].scaled(128,128),health) # Sets up the entity. Uses the first image in __idle_images as the base image in the entity.
+        
+    def update(self, game: Widget):
+        self.setList(game.currentLevel.entitylist())
+        return super().update(game)

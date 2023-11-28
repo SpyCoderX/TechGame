@@ -27,10 +27,13 @@ class MainGame(Widget):
         super().__init__()
         self.baseLevel = LevelBuilder((50,50)).setWalls("stone").setFloor("darkstone").build() # LevelLoader("default").level()
         self.overLevel = LevelBuilder((20,20)).setWalls("stone").setFloor("stone").build() # LevelLoader("default_over").level()
-        self.currenLevel = self.baseLevel
+        self.currentLevel = self.baseLevel
         self.Player = Player(100) # Player instance
+        spawn = self.currentLevel.tileMap().spawn()
+        self.Player.pos.setAll(spawn[0],spawn[1])
+        
         self.rScreen = None # Reference to the widget that displays to the window. Allows other objects to write to the widget easily.
-        self.camera = Cam(cnvrtLstToQPntF(self.currenLevel.tileMap().spawn())) # Camera for position of all objects. NOTE: SETUP CAMERA BASED ON PLAYER SPAWN LOCATION
+        self.camera = Cam(self.Player.pos) # Camera for position of all objects. NOTE: SETUP CAMERA BASED ON PLAYER SPAWN LOCATION
         
     def tick(self,screen:Widget):
         self.rScreen = screen
@@ -42,7 +45,7 @@ class MainGame(Widget):
 
     # Main update function
     def updates(self):
-        self.currenLevel.update(self)
+        self.currentLevel.update(self)
         self.updatePlayer()
         self.ui_update()
         self.updateCamera()
@@ -76,7 +79,7 @@ class MainGame(Widget):
         pass
 
     def renders(self):
-        self.currenLevel.render(self)
+        self.currentLevel.render(self)
         self.Player.render(self)
         self.ui_render(self)
 

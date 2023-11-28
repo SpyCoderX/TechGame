@@ -4,8 +4,13 @@ import math
 from PyQt6.QtCore import QRect, QPoint,QPointF
 from typing import List
 from .TileVARS import SIZE
+
 import json
 import os
+
+
+
+
 
 def LoadTileMap(name):
     name = "Levels/Level_"+name+".json" # Get file address
@@ -47,7 +52,7 @@ def SaveTileMap(map,name):
 class TileMap:
     def __init__(self,sizew,sizeh) -> None:
         self.__TILES = [[Tile("air","air") for y in range(sizew)] for x in range(sizeh)]
-        self.__spawn = (math.ceil(sizew/2)-1,math.ceil(sizeh/2)-1)
+        self.__spawn = ((math.ceil(sizew/2)-1)*SIZE,(math.ceil(sizeh/2)-1)*SIZE)
 
     def setSpawn(self,pos):
         self.__spawn = tuple(pos)
@@ -92,8 +97,10 @@ class TileMap:
         tile.setPos(pos)
         self.__TILES[pos[1]][pos[0]] = tile
 
-    def tile(self,x,y):
+    def tile(self,x,y): # Gets a tile using the coords of TILE
         return self.__TILES[y][x]
+    def getTile(self,x,y): # gets a tile using coords of an ENTITY.
+        return self.tile(round(x/SIZE),round(y/SIZE))
     
     def fill(self,tile):
         for y in range(len(self.__TILES)):

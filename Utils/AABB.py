@@ -32,9 +32,7 @@ class AABB:
     def contains(self,AB):
         return AB.rect[0][0]>=self.rect[0][0] and AB.rect[0][1]>=self.rect[0][1] and AB.rect[1][0]<=self.rect[1][0] and AB.rect[1][1]<=self.rect[1][1]
     def draw(self,screen):
-        if isinstance(self,AABBBranch):
-            return
-        if len(tree.getCollisions(self)):
+        if tree.getCollisions(self):
             pygame.draw.rect(screen,(255,0,0),[self.rect[0][0],self.rect[0][1],self.rect[1][0]-self.rect[0][0],self.rect[1][1]-self.rect[0][1]],1)
         else:
             pygame.draw.rect(screen,(255,255,255),[self.rect[0][0],self.rect[0][1],self.rect[1][0]-self.rect[0][0],self.rect[1][1]-self.rect[0][1]],1)
@@ -108,8 +106,7 @@ class AABBBranch(AABB):
             self.setLeft(self.left)
 
     def draw(self,screen):
-        super().draw(screen)
-        if self.left:self.left.draw(screen)
+        self.left.draw(screen)
         if self.right:self.right.draw(screen)
 
 class AABBLeaf(AABB):
@@ -130,13 +127,13 @@ class AABBTree(AABBBranch):
     def getCollisions(self, AB):
         colls = [self] # Current objects to check for collisions... kinda
         collisions = []
-        while len(colls): # Simpler len(colls)>0
+        while colls: # Simpler len(colls)>0
             c = colls.pop(0)
             if c==AB:continue
             if c.collides(AB):
                 if isinstance(c,AABBBranch):
-                    if c.left: colls.append(c.left)
-                    if c.right: colls.append(c.right)
+                    colls.append(c.left)
+                    if c.right:colls.append(c.right)
                 else:
                     collisions.append(c)
         return collisions

@@ -1,5 +1,5 @@
 from Widgets.Game.Entity import EntityList
-from Widgets.Game.Tiles import TileMap,LoadTileMap,Tile
+from Widgets.Game.Tiles import TileMap,LoadTileMap,Tile,TileBuilder
 from typing import Tuple
 class Level:
     __TileMap: TileMap
@@ -37,7 +37,7 @@ class LevelBuilder:
         self.__floor = "air"
     def setWalls(self,wallid):
         self.__walls = wallid
-        self.__level.tileMap().setWalls(Tile(self.__walls,self.__floor))
+        self.__level.tileMap().setWalls(TileBuilder(self.__walls,self.__floor).build())
         return self
     def setFloor(self,floorid):
         self.__floor = floorid

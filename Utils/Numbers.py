@@ -47,6 +47,9 @@ class Loc(QPointF):
         return Vector2D(self.x(),self.y())
     def getList(self):
         return [self.x(),self.y()]
+    def setAll(self,x,y):
+        self.setX(x)
+        self.setY(y)
 class Vector2D(QVector2D):
     def setAll(self,x,y):
         self.setX(x)
