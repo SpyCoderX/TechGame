@@ -70,20 +70,24 @@ class Tile:
     
 
     # Rendering code
-    def render(self,game):
+    def render(self,game,edge):
         oldPos = self.pos()
         camPos = game.camera.pos()
         camPos = [camPos.x(),camPos.y()]
         pos = [oldPos[x]*SIZE-camPos[x] for x in range(2)]
+        
         fIcon = self.iconFloor() # Floor Icon
         game.rScreen.getThisPainter().drawImage(centerImage(QPointF(pos[0],pos[1]),fIcon),fIcon)
-        icon = self.icon()
-        game.rScreen.getThisPainter().drawImage(centerImage(QPointF(pos[0],pos[1]),icon),icon)
-    
+        if self.ID()!="air":
+            icon = self.icon()
+            game.rScreen.getThisPainter().drawImage(centerImage(QPointF(pos[0],pos[1]),icon),icon)
+        if edge!="":
+            eIcon = TileDictionary.getTileImg("edge_"+edge)
+            game.rScreen.getThisPainter().drawImage(centerImage(QPointF(pos[0],pos[1]),eIcon),eIcon)
+        
+        
 
-    # Overlay for say, a cannon to allow the cannon to render on top of nearby tiles without clipping.
-    def overlay(self,game):
-        pass
+    
 
     def icon(self):
         return self.__icon

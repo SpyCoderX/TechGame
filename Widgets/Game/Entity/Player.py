@@ -7,6 +7,7 @@ from Widgets.Base import Object,Widget
 from Utils.Numbers import Loc
 from Widgets.Game.Entity.LivingEntity import LivingEntity
 from Utils.Images import Anim
+from Utils.Numbers import Vector2D
 import os
 # Importing PyQt6 stuff, and the other files.
 
@@ -15,7 +16,9 @@ class Player(LivingEntity):
         self.__idle_images = Anim("PlayerIdle") # Idle Animation
         self.__walking_images = Anim("PlayerWalk") # Walking Animation
         super().__init__(self.__idle_images.images()[0].scaled(128,128),health) # Sets up the entity. Uses the first image in __idle_images as the base image in the entity.
-        
+        self.Direction = Vector2D()
+
+
     def update(self, game: Widget):
         self.setList(game.currentLevel.entitylist())
         return super().update(game)

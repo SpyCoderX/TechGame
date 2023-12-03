@@ -9,8 +9,7 @@ from Widgets.Base import Widget
 class Screen(Widget):
     def __init__(self) -> None:
         super().__init__()
-        self.setMinimumSize(1200,800)
-        self.setBaseSize(1200,800)
+        self.setMinimumSize(600,400)
         self.game = Game.MainGame()
         l = QStackedLayout()
         l.addWidget(self.game)

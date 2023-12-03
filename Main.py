@@ -24,7 +24,7 @@ Create:
 
 Camera.py - DONE
 
-PauseUI.py
+PauseUI.pyd
 OverlayUI.py
 StartMenuUI.py
 Mode.py (For the current mode, Start Menu, In Game, Pause Menu, Shop Menu)

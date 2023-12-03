@@ -29,7 +29,7 @@ class EntityList:
     def update(self,game):
         for e in self.__LIST:
             e.update(game)
-            self.tree.update(e.ABBox,e)
+            self.tree.update(e.getAB(),e)
 
 
     def render(self,game):

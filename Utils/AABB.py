@@ -32,7 +32,7 @@ class AABB:
     def contains(self,AB):
         return AB.rect[0][0]>=self.rect[0][0] and AB.rect[0][1]>=self.rect[0][1] and AB.rect[1][0]<=self.rect[1][0] and AB.rect[1][1]<=self.rect[1][1]
     def draw(self,screen):
-        if tree.getCollisions(self):
+        if tree.getCollisions(self) and isinstance(self,AABBLeaf):
             pygame.draw.rect(screen,(255,0,0),[self.rect[0][0],self.rect[0][1],self.rect[1][0]-self.rect[0][0],self.rect[1][1]-self.rect[0][1]],1)
         else:
             pygame.draw.rect(screen,(255,255,255),[self.rect[0][0],self.rect[0][1],self.rect[1][0]-self.rect[0][0],self.rect[1][1]-self.rect[0][1]],1)
@@ -106,6 +106,7 @@ class AABBBranch(AABB):
             self.setLeft(self.left)
 
     def draw(self,screen):
+        super().draw(screen)
         self.left.draw(screen)
         if self.right:self.right.draw(screen)
 
@@ -158,11 +159,11 @@ if __name__ == "__main__":
     import random
     tree = AABBTree()
     AB = AABB([20,20],[40,40])
-    # AB2 = AABB([0,0],[1000,1000])
-    for x in range(1000):
-        mx,my = [random.randint(0,1200),random.randint(0,800)]
-        tree.add(AABB([mx-10,my-10],[mx+10,my+10]),x)
     tree.add(AB,"mouse")
+    for x in range(10):
+        mx,my = (random.randint(20,700),random.randint(20,700))
+        AB = AABB([mx-10,my-10],[mx+10,my+10])
+        tree.add(AB,"mo")
     clock = pygame.time.Clock()
 
     screen = pygame.display.set_mode((1200,800))

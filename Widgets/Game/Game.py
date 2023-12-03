@@ -51,18 +51,32 @@ class MainGame(Widget):
         self.updateCamera()
 
     def updatePlayer(self):
+        # Get player input 
         horizontal = self.rScreen.keys["d"]-self.rScreen.keys["a"]
         vertical = self.rScreen.keys["s"]-self.rScreen.keys["w"]
-        self.Player.acceleration.setAll(horizontal,vertical)
+
+        # Update player acceleration
+        self.Player.acceleration.setAll(horizontal*PLAYER_SPEED,vertical*PLAYER_SPEED)
+
+        # Grab camera position
         p1 = self.camera.pos()
+        # Convert from Loc() to list
         p1 = [p1.x(),p1.y()]
+        # Grab Player position
         p2 = self.Player.pos.getList()
+        # Grab mouse position
         p3 = self.rScreen.mousePos()
+        # Convert from Loc() to list
         p3 = [p3.x(),p3.y()]
+        # Calculate player position on screen
         p2 = [p2[0]-p1[0],p2[1]-p1[1]]
+        # Calculate direction from player to mouse
         r = math.atan2(p3[1]-p2[1],p3[0]-p2[0])
+        # Set player rotation
         self.Player.pos.R=math.degrees(r)
+        # Update Player
         self.Player.update(self)
+
     def updateCamera(self):
         pos = self.camera.pos()
         size = self.camera.size()

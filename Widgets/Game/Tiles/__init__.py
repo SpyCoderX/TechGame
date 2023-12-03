@@ -51,8 +51,9 @@ def SaveTileMap(map,name):
 
 class TileMap:
     def __init__(self,sizew,sizeh) -> None:
-        self.__TILES = [[Tile("air","air") for y in range(sizew)] for x in range(sizeh)]
+        self.__TILES = [[Tile("air","air") for x in range(sizew)] for yx in range(sizeh)]
         self.__spawn = ((math.ceil(sizew/2)-1)*SIZE,(math.ceil(sizeh/2)-1)*SIZE)
+        self.__updates = []
 
     def setSpawn(self,pos):
         self.__spawn = tuple(pos)
@@ -72,11 +73,11 @@ class TileMap:
         r = self.getShownRect(game)
         for y in range(r[0][1],r[1][1]):
             for x in range(r[0][0],r[1][0]):
-                self.tile(x,y).render(game)
-        for y in range(r[0][1],r[1][1]):
-            for x in range(r[0][0],r[1][0]):
-                self.tile(x,y).overlay(game)
-
+                self.tile(x,y).render(game,self.getEdges(x,y))
+    def isOnEdge(self,x,y):
+        return (x==0 or x==len(self.__TILES[0])-1) and (y==0 or y==len(self.__TILES)-1)
+    def getEdges(self,x,y):
+        return ("Top" if y==0 else "Bottom" if y==len(self.__TILES)-1 else "")+("Left" if x==0 else "Right" if x==len(self.__TILES[0])-1 else "")
     def setWalls(self,tile):
         for x in range(len(self.__TILES[0])):
             self.setTile(tile.copy(),(x,0))
@@ -98,7 +99,9 @@ class TileMap:
         self.__TILES[pos[1]][pos[0]] = tile
 
     def tile(self,x,y): # Gets a tile using the coords of TILE
-        return self.__TILES[y][x]
+        if 0<=x<len(self.__TILES[y]) and 0<=y<len(self.__TILES):
+            return self.__TILES[y][x]
+        return None
     def getTile(self,x,y): # gets a tile using coords of an ENTITY.
         return self.tile(round(x/SIZE),round(y/SIZE))
     
@@ -122,11 +125,11 @@ class TileMap:
         cPos:QPointF = game.camera.pos() # Camera Position
         Pos = [cPos.x(),cPos.y()]
         start = [math.floor(Pos[x]/SIZE) for x in range(2)]
-        start = [max(min(start[0],len(self.__TILES[0])-1),0),max(min(start[1],len(self.__TILES)-1),0)]
+        start = [max(min(start[0],len(self.__TILES[0])),0),max(min(start[1],len(self.__TILES)),0)]
         sPos = game.camera.size() # Camera Size
         sPos = [sPos[0]+Pos[0],sPos[1]+Pos[1]]
         end = [math.ceil(sPos[x]/SIZE+1) for x in range(2)]
-        end = [max(min(end[0],len(self.__TILES[0])-1),0),max(min(end[1],len(self.__TILES)-1),0)]
+        end = [max(min(end[0],len(self.__TILES[0])),0),max(min(end[1],len(self.__TILES)),0)]
         return [[start[0],start[1]],[end[0],end[1]]]
 
 

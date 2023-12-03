@@ -46,7 +46,8 @@ class Entity(Object):
 
     def getAB(self):
         pos = self.pos.getList()
-        return AABB([pos[0]-self.ABBox[0]/2,pos[1]-self.ABBox[1]/2],[pos[0]+self.ABBox[0]/2,pos[1]+self.ABBox[1]/2])
+        vel = self.velocity
+        return AABB([pos[0]-self.ABBox[0]/2,pos[1]-self.ABBox[1]/2],[pos[0]+self.ABBox[0]/2,pos[1]+self.ABBox[1]/2]).expand(AABB((vel.x()*self.ABBox[0]/2,vel.y()*self.ABBox[1]/2),(vel.x()*self.ABBox[0]/2,vel.y()*self.ABBox[1]/2)))
 
     def list(self): # EntityList
         if self.__list==None:
@@ -69,6 +70,8 @@ class Entity(Object):
             modX = x%SIZ
             modY = y%SIZ
             tile = game.currentLevel.tileMap().getTile(x,y)
+            if tile == None:
+                return po
             if tile.collision()==SOLID:
                 if cx:
                     if self.velocity.x() < 0:
@@ -112,9 +115,6 @@ class Entity(Object):
         p.drawImage(centerImage(QPoint(0,0),img),img)
         p.setPen(QPen(QColor(255,255,255,255)))
         p.rotate(-self.pos.R)
-
-        # For testing \/  \/
-        p.drawRect(QRectF(-self.ABBox[0]/2,-self.ABBox[1]/2,self.ABBox[0],self.ABBox[1]))
 
 
     def getImage(self): # Override this function in other entities to allow modification of the image, or for animations.
