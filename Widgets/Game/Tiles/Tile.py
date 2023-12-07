@@ -19,7 +19,35 @@ class Tile:
         self.__icon =  TileDictionary.getTileImg(self.__id) # Icon
         self.__floorIcon =  TileDictionary.getTileImg(self.__floor)
         self.__collisionStatus:int = NO_COLLISION # Collision Status
+        self.__tile_connections = "0000" # Which tiles are the same type around this tile (top,right,bottom,left)
+        self.__tile_connection_mode = NO_CONNECTION
+        self.__light_level = 0 # Light Level
 
+    # Set Light Level
+    def setLight(self,light):
+        self.__light_level = light
+
+    # Get Light Level
+    def light(self):
+        return self.__light_level
+
+    # Set Tile Connection Mode
+    def setConnectionMode(self,mode):
+        self.__tile_connection_mode = mode
+        self.fixTexture()
+
+    # Get Tile Connection Mode
+    def connectionMode(self):
+        return self.__tile_connection_mode
+
+    # Set Tile Connections
+    def setConnections(self,conns:str):
+        self.__tile_connections = conns
+        self.fixTexture()
+
+    # Get Tile Connections
+    def connections(self):
+        return self.__tile_connections
 
     # Get Collision state
     def collision(self):
@@ -52,7 +80,11 @@ class Tile:
     # Set ID
     def setID(self,ID):
         self.__id = ID
-        self.__icon = TileDictionary.getTileImg(self.__id)
+        self.fixTexture()
+
+    # Fix Base Texture
+    def fixTexture(self):
+        self.__icon = TileDictionary.getTileImg(self.__id+("_"+self.connections() if self.connectionMode() else ""))
 
     # Get Floor ID
     def floorID(self):
@@ -103,6 +135,8 @@ class Solid(Tile):
     def __init__(self, id, floor) -> None:
         super().__init__(id, floor)
         self.setCollision(SOLID)
+        self.setConnectionMode(CONNECTIONS)
+
     
 class TileBuilder:
     def __init__(self,id,floor) -> None:

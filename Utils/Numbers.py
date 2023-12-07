@@ -9,6 +9,10 @@ def centerImage(Point:QPoint,Image:QImage):
 def cnvrtLstToQPntF(list): #Convert List To QPointF (Convert Cnvrt, List Lst, To To, QPointF QPntf)
     return QPointF(list[0],list[1])
 
+def addPoints(p1,p2):
+    return QPointF(p1.x()+p2.x(),p1.y()+p2.y())
+
+
 class Loc(QPointF):
     R = 0
     @overload

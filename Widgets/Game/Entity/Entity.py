@@ -7,7 +7,11 @@ from Widgets.Base import Object,Widget
 from Utils.Numbers import *
 from Utils import Images
 from Utils.AABB import AABB
-from Widgets.Game.Tiles.TileVARS import SOLID,SHOOT_THROUGH,SIZE
+from Widgets.Game.Tiles.TileVARS import SOLID,SIZE
+from Utils.Images import load
+
+ENTITY_SHADOW = load("Entity_Shadow")
+
 class Entity(Object):
     def __init__(self,img:QImage):
         super().__init__()
@@ -36,6 +40,7 @@ class Entity(Object):
         self.frictionMultiplier = 0.8
 
         self.ABBox = [64,64]
+        self.shadow = ENTITY_SHADOW.scaled(self.ABBox[0],self.ABBox[1])
         """ [---] END OF INIT [---] """
         
     def setList(self,list): # EntityList
@@ -102,8 +107,12 @@ class Entity(Object):
 
     def render(self,game):
         self.list()
+        self.check_sizes()
         self.drawSelf(game)
 
+    def check_sizes(self):
+        if self.shadow.size().width()!=self.ABBox[0] or self.shadow.size().height()!=self.ABBox[1]:
+            self.shadow = ENTITY_SHADOW.scaled(self.ABBox[0],self.ABBox[1])
 
     def drawSelf(self,game): #This function renders the entity. Gets the screen, obtains the PyQt6 Painter to draw to it, draws a picture at the current position, minus the camera to move based on camera and draws this image.
         # t = QtGui.QTransform()
@@ -111,9 +120,9 @@ class Entity(Object):
         img = self.getImage()#.transformed(t)
         p:QPainter = game.rScreen.getThisPainter()
         p.translate(self.pos.subtractPoint(game.camera.pos()))
+        p.drawImage(centerImage(QPoint(0,0),self.shadow),self.shadow)
         p.rotate(self.pos.R)
         p.drawImage(centerImage(QPoint(0,0),img),img)
-        p.setPen(QPen(QColor(255,255,255,255)))
         p.rotate(-self.pos.R)
 
 

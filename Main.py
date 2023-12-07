@@ -4,6 +4,7 @@ from PyQt6.QtGui import *
 from PyQt6.QtWidgets import *
 from Widgets.Window import BaseW 
 
+
 app = QApplication(sys.argv)
 B = BaseW()
 B.show()
@@ -14,7 +15,7 @@ Add more code to:
 
 Entity 20%
 LivingEntity - what am i doing with this again?
-Item - #copy() #setImg() #setName() #setRarity() #name() #img() #rarity()
+Item
 Tile
 BaseEnemy
 Player 2%

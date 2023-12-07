@@ -3,7 +3,7 @@ from Utils.Images import load,default
 import math
 from PyQt6.QtCore import QRect, QPoint,QPointF
 from typing import List
-from .TileVARS import SIZE
+from .TileVARS import *
 
 import json
 import os
@@ -49,19 +49,21 @@ def SaveTileMap(map,name):
     json.dump({"spawn":spawn,"map":map_list},file)
     file.close()
 
-class TileMap:
-    def __init__(self,sizew,sizeh) -> None:
-        self.__TILES = [[Tile("air","air") for x in range(sizew)] for yx in range(sizeh)]
-        self.__spawn = ((math.ceil(sizew/2)-1)*SIZE,(math.ceil(sizeh/2)-1)*SIZE)
-        self.__updates = []
+class TileMap: # An object that holds all tiles.
+    def __init__(self,sizew,sizeh) -> None: # Init
+        self.__TILES = [[Tile("air","air") for x in range(sizew)] for y in range(sizeh)] # Setup an empty TileMap/list.
+        self.__spawn = ((math.ceil(sizew/2)-1)*SIZE,(math.ceil(sizeh/2)-1)*SIZE) # Spawn location for this TileMap.
+        self.__updates = [] # Objects to update. (Coming soon)
 
+    # Set Spawn Location
     def setSpawn(self,pos):
         self.__spawn = tuple(pos)
 
+    # Get Spawn Location
     def spawn(self):
         return self.__spawn
         
-    
+    # Update all tiles (Coming soon: Update only tiles that need to update.)
     def update(self,game):
         r = self.getShownRect(game)
         for y in range(r[0][1],r[1][1]):
@@ -74,10 +76,13 @@ class TileMap:
         for y in range(r[0][1],r[1][1]):
             for x in range(r[0][0],r[1][0]):
                 self.tile(x,y).render(game,self.getEdges(x,y))
+
     def isOnEdge(self,x,y):
-        return (x==0 or x==len(self.__TILES[0])-1) and (y==0 or y==len(self.__TILES)-1)
+        return (x==0 or x==len(self.__TILES[0])-1) and (y==0 or y==len(self.__TILES)-1) # Add a system for lighting.
+    
     def getEdges(self,x,y):
         return ("Top" if y==0 else "Bottom" if y==len(self.__TILES)-1 else "")+("Left" if x==0 else "Right" if x==len(self.__TILES[0])-1 else "")
+    
     def setWalls(self,tile):
         for x in range(len(self.__TILES[0])):
             self.setTile(tile.copy(),(x,0))
@@ -89,21 +94,62 @@ class TileMap:
             self.setTile(tile.copy(),(len(self.__TILES)-1,y))
 
     def setTiles(self,tiles:List[List[Tile]]):
-        self.__TILES = tiles
+        sx = len(tiles[0])
+        sy = len(tiles)
+        self.__TILES = [[Tile("air","air") for x in range(sx)] for y in range(sy)] # Setup an empty TileMap/list.
+        for y in range(sy):
+            for x in range(sx):
+                self.setTile(tiles[y][x])
 
     def tiles(self):
         return self.__TILES
     
+    def isInRange(self,x,y):
+        return 0<=x<len(self.__TILES[0]) and 0<=y<len(self.__TILES)
+
     def setTile(self,tile,pos):
+        if not self.isInRange(pos[0],pos[1]): print("Error: Unable to set tile out of bounds."); return
         tile.setPos(pos)
         self.__TILES[pos[1]][pos[0]] = tile
 
-    def tile(self,x,y): # Gets a tile using the coords of TILE
-        if 0<=x<len(self.__TILES[y]) and 0<=y<len(self.__TILES):
+        # Fix the set tile.
+        self.fixTile(pos[0],pos[1])
+        
+        # Fix the surrounding tiles.
+        self.fixTile(pos[0],pos[1]-1) # Top
+        self.fixTile(pos[0]+1,pos[1]) # Right
+        self.fixTile(pos[0],pos[1]+1) # Bottom
+        self.fixTile(pos[0]-1,pos[1]) # Left
+    
+    # Fix the tile connections for the selected tile.
+    def fixTile(self,x,y):
+        tile = self.tile(x,y)
+        if self.tile(x,y).connectionMode()==NO_CONNECTION:
+            return
+        conns = ""
+        conns += "1" if self.tileConnection(x,y-1,tile) else "0" # Top
+        conns += "1" if self.tileConnection(x+1,y,tile) else "0" # Right
+        conns += "1" if self.tileConnection(x,y+1,tile) else "0" # Bottom
+        conns += "1" if self.tileConnection(x-1,y,tile) else "0" # Left
+        tile.setConnections(conns)
+
+    # Check if the tile at x,y connects to the tile
+    def tileConnection(self,x,y,tile):
+        t = self.tile(x,y)
+        return tile.connectionMode()==CONNECTIONS and t.ID()==tile.ID() and t.connectionMode()==CONNECTIONS
+    def tile(self,x,y): # Gets a tile using the coords of Tiles in the list.
+        if self.isInRange(x,y):
             return self.__TILES[y][x]
-        return None
-    def getTile(self,x,y): # gets a tile using coords of an ENTITY.
+        else:
+            t = Tile("air","air")
+            t.setLight(0)
+            return Tile("air","air")
+    
+    def getTile(self,x,y) -> Tile: # gets a tile using global coords.
         return self.tile(round(x/SIZE),round(y/SIZE))
+    
+    def toTilePos(self,x,y):
+        return [round(x/SIZE),round(y/SIZE)]
     
     def fill(self,tile):
         for y in range(len(self.__TILES)):
@@ -131,6 +177,7 @@ class TileMap:
         end = [math.ceil(sPos[x]/SIZE+1) for x in range(2)]
         end = [max(min(end[0],len(self.__TILES[0])),0),max(min(end[1],len(self.__TILES)),0)]
         return [[start[0],start[1]],[end[0],end[1]]]
+
 
 
 
