@@ -10,14 +10,12 @@ from Widgets.Game.Entity.Player import Player
 from Widgets.Game.Level import LevelLoader,Level,LevelBuilder
 from Widgets.Game.Tiles.Tile import TileBuilder
 from Utils.Images import load
-from Utils.Numbers import cnvrtLstToQPntF,addPoints
+from Utils import Numbers
 import math
 #imports ^
 
+from Vars.GLOBAL_VARS import PLAYER_SPEED,CAMERA_FRICTION_MULTIPLIER
 
-# GAME VARIABLES
-CAMERA_FRICTION_MULTIPLIER = 0.8
-PLAYER_SPEED = 2
 
 
 
@@ -28,7 +26,7 @@ class MainGame(Widget):
     def __init__(self) -> None:
         super().__init__()
         self.baseLevel = LevelBuilder((50,50)).setWalls("stone").setFloor("darkstone").build() # LevelLoader("default").level()
-        self.overLevel = LevelBuilder((20,20)).setWalls("stone").setFloor("stone").build() # LevelLoader("default_over").level()
+        self.overLevel = LevelBuilder((20,20)).setWalls("stone").setFloor("darkstone").build() # LevelLoader("default_over").level()
         self.currentLevel = self.baseLevel
         self.Player = Player(100) # Player instance
         spawn = self.currentLevel.tileMap().spawn()
@@ -50,13 +48,23 @@ class MainGame(Widget):
         for x in range(len(self.rScreen.key_presses)):
             key = self.rScreen.key_presses.pop(0)
             if key==Qt.Key.Key_G:
-                point = addPoints(self.rScreen.mousePos(),self.camera.pos())
-                pos = self.currentLevel.tileMap().toTilePos(point.x(),point.y())
-                self.currentLevel.tileMap().setTile(TileBuilder("stone","darkstone").build(),pos)
+                point = Numbers.addPoints(self.rScreen.mousePos(),self.camera.pos())
+                tile = self.currentLevel.tileMap().getTile(point.x(),point.y())
+                self.currentLevel.tileMap().setTile(TileBuilder(self.currentLevel.tileMap(),"stone",tile.floorID()).light(tile.light()).build(),tile.pos())
             if key==Qt.Key.Key_T:
-                point = addPoints(self.rScreen.mousePos(),self.camera.pos())
-                pos = self.currentLevel.tileMap().toTilePos(point.x(),point.y())
-                self.currentLevel.tileMap().setTile(TileBuilder("air","darkstone").build(),pos)
+                point = Numbers.addPoints(self.rScreen.mousePos(),self.camera.pos())
+                tile = self.currentLevel.tileMap().getTile(point.x(),point.y())
+                self.currentLevel.tileMap().setTile(TileBuilder(self.currentLevel.tileMap(),"air",tile.floorID()).light(tile.light()).build(),tile.pos())
+            if key==Qt.Key.Key_Y:
+                point = Numbers.addPoints(self.rScreen.mousePos(),self.camera.pos())
+                tile = self.currentLevel.tileMap().getTile(point.x(),point.y())
+                tile.setLight(0)
+                self.currentLevel.tileMap().setTile(tile,tile.pos())
+            if key==Qt.Key.Key_H:
+                point = Numbers.addPoints(self.rScreen.mousePos(),self.camera.pos())
+                tile = self.currentLevel.tileMap().getTile(point.x(),point.y())
+                tile.setLight(1)
+                self.currentLevel.tileMap().setTile(tile,tile.pos())
         self.currentLevel.update(self)
         self.updatePlayer()
         self.ui_update()

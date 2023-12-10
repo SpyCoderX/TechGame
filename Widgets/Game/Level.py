@@ -37,7 +37,7 @@ class LevelBuilder:
         self.__floor = "air"
     def setWalls(self,wallid):
         self.__walls = wallid
-        self.__level.tileMap().setWalls(TileBuilder(self.__walls,self.__floor).build())
+        self.__level.tileMap().setWalls(TileBuilder(self.__level.tileMap(),self.__walls,self.__floor).build())
         return self
     def setFloor(self,floorid):
         self.__floor = floorid

@@ -1,6 +1,7 @@
 from PyQt6.QtCore import *
 from PyQt6.QtGui import *
 from typing import overload
+from Vars.GLOBAL_VARS import SIZE
 
 
 def centerImage(Point:QPoint,Image:QImage):
@@ -11,6 +12,12 @@ def cnvrtLstToQPntF(list): #Convert List To QPointF (Convert Cnvrt, List Lst, To
 
 def addPoints(p1,p2):
     return QPointF(p1.x()+p2.x(),p1.y()+p2.y())
+
+def toTilePos(pos):
+    return [round(pos[0]/SIZE),round(pos[1]/SIZE)]
+
+def tileToGlobalPos(x,y):
+    return [x*SIZE,y*SIZE]
 
 
 class Loc(QPointF):

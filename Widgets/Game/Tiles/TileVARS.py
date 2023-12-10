@@ -1,7 +1,7 @@
 # This file has variables which are used elswhere. It has no imports to prevent circular imports.
 
 # Tile Size
-SIZE = 128
+
 
 # Tile Collision Types
 NO_COLLISION = 0

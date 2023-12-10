@@ -7,7 +7,8 @@ from Widgets.Base import Object,Widget
 from Utils.Numbers import *
 from Utils import Images
 from Utils.AABB import AABB
-from Widgets.Game.Tiles.TileVARS import SOLID,SIZE
+from Widgets.Game.Tiles.TileVARS import SOLID
+from Vars.GLOBAL_VARS import SIZE
 from Utils.Images import load
 
 ENTITY_SHADOW = load("Entity_Shadow")
