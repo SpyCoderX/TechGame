@@ -175,9 +175,11 @@ class Tile:
             if self.lightConnections()!="00000000":
                 eIcon = self.__lightIcon
                 game.rScreen.getThisPainter().drawImage(centerImage(QPointF(pos[0],pos[1]),eIcon),eIcon)
-        
-        
 
+    # Allow some tiles to have an overlay to prevent tiles clipping.
+    def getOverlay(self,game):
+        return None
+    
     
 
     def icon(self):

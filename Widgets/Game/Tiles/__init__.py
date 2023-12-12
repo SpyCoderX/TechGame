@@ -74,10 +74,16 @@ class TileMap: # An object that holds all tiles.
         
         
     def render(self,game):
+        overlays = []
         r = self.getShownRect(game)
         for y in range(r[0][1],r[1][1]):
             for x in range(r[0][0],r[1][0]):
                 self.tile(x,y).render(game)
+                ol = self.tile(x,y).getOverlay(game) # Overlay function
+                if ol:
+                    overlays.append(ol)
+        for overlay in overlays:
+            overlay(game)
 
     # [ Depricated ]
     # Check is a tile is on the edge of the map.

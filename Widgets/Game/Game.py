@@ -17,12 +17,12 @@ import math
 from Vars.GLOBAL_VARS import PLAYER_SPEED,CAMERA_FRICTION_MULTIPLIER
 
 
-
+VIGNETTE = None # Vignette effect (Pronounced Vin-ye-t)
 
 
 class MainGame(Widget):
     """Controls the updating and rendering of Tiles, Entities, and UIs"""
-
+    vin = False
     def __init__(self) -> None:
         super().__init__()
         self.baseLevel = LevelBuilder((50,50)).setWalls("stone").setFloor("darkstone").build() # LevelLoader("default").level()
@@ -31,11 +31,15 @@ class MainGame(Widget):
         self.Player = Player(100) # Player instance
         spawn = self.currentLevel.tileMap().spawn()
         self.Player.pos.setAll(spawn[0],spawn[1])
+        global VIGNETTE
         
         self.rScreen = None # Reference to the widget that displays to the window. Allows other objects to write to the widget easily.
         self.camera = Cam(self.Player.pos) # Camera for position of all objects. NOTE: SETUP CAMERA BASED ON PLAYER SPAWN LOCATION
         
     def tick(self,screen:Widget):
+        if self.rScreen==None:
+            global VIGNETTE
+            VIGNETTE = load("Vignette").scaled(screen.frameGeometry().size())
         self.rScreen = screen
         self.camera.setSize([self.rScreen.frameGeometry().width(),self.rScreen.frameGeometry().height()])
         self.fill(screen,self.getBrush(QColor(0,0,0,255)))
@@ -51,6 +55,8 @@ class MainGame(Widget):
                 point = Numbers.addPoints(self.rScreen.mousePos(),self.camera.pos())
                 tile = self.currentLevel.tileMap().getTile(point.x(),point.y())
                 self.currentLevel.tileMap().setTile(TileBuilder(self.currentLevel.tileMap(),"stone",tile.floorID()).light(tile.light()).build(),tile.pos())
+            if key==Qt.Key.Key_Z:
+                self.vin = not self.vin
             if key==Qt.Key.Key_T:
                 point = Numbers.addPoints(self.rScreen.mousePos(),self.camera.pos())
                 tile = self.currentLevel.tileMap().getTile(point.x(),point.y())
@@ -115,7 +121,13 @@ class MainGame(Widget):
     def renders(self):
         self.currentLevel.render(self)
         self.Player.render(self)
+        self.vignette()
         self.ui_render(self)
+
+    def vignette(self):
+        if self.vin: return
+        p:QPainter = self.rScreen.getThisPainter()
+        p.drawImage(QPoint(0,0),VIGNETTE)
 
     def ui_render(self,screen:Widget):
         pass
