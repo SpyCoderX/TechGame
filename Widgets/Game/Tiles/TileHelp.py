@@ -7,15 +7,15 @@ dflt = default().scaled(SIZE,SIZE)
 class TileDict:
     def __init__(self) -> None:
         self.__tiles = {
-            "air":"Air",
-            "darkstone":"Darkstone",
+            "air":"air",
+            "darkstone":"darkstone",
 
         }
         self.__images = {}
         for x in range(256):
             y = bin(x)[2:]
             y = "0"*(8-len(y))+y
-            self.__tiles["dark_"+y] = "Dark_"+y
+            self.__tiles["dark_"+y] = "dark_"+y
     def getTileImg(self,tile:str):
         Name = self.__tiles.get(tile)
         if Name == None:return self.default(tile)

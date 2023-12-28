@@ -7,7 +7,7 @@ import os
 from Utils.Errors import ImageLoadError,ImageError
 
 def convertToImagePath(str):
-    return "Images\\"+str+".png"
+    return "Media\\Images\\"+str+".png"
 
 def load(s:str) -> QImage:
     s = convertToImagePath(s)

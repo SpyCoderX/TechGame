@@ -204,11 +204,14 @@ class Tile:
     # Returns a generator for IDs and Textures for this tile.
     def genorateTextures(self):
         if self.connectionMode():
-            for x in range(16):
+            
 
-                # Calculate ID, first ID, then an _, then 0s to replace all the missing zeros from the "bin" function.
-                s = self.ID()+"_"+("0"*(4-max(1,math.ceil(math.log2(x+1)))))+bin(x)[2:]
-                yield {"id":s,"file":s}
+            
+            for x in range(16):
+                y = bin(x)[2:]
+                y = "0"*(4-len(y))+y
+                v = self.ID()+"_"+y
+                yield {"id":v,"file":v}
         else:
             yield {"id":self.ID(),"file":self.ID()}
 
