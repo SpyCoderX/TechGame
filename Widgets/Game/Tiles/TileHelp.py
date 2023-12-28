@@ -9,22 +9,7 @@ class TileDict:
         self.__tiles = {
             "air":"Air",
             "darkstone":"Darkstone",
-            "stone_0000":"Stone-0000",
-            "stone_0001":"Stone-0001",
-            "stone_0010":"Stone-0010",
-            "stone_0011":"Stone-0011",
-            "stone_0100":"Stone-0100",
-            "stone_0101":"Stone-0101",
-            "stone_0110":"Stone-0110",
-            "stone_0111":"Stone-0111",
-            "stone_1000":"Stone-1000",
-            "stone_1001":"Stone-1001",
-            "stone_1010":"Stone-1010",
-            "stone_1011":"Stone-1011",
-            "stone_1100":"Stone-1100",
-            "stone_1101":"Stone-1101",
-            "stone_1110":"Stone-1110",
-            "stone_1111":"Stone-1111"
+
         }
         self.__images = {}
         for x in range(256):
@@ -42,9 +27,26 @@ class TileDict:
         return dflt
     def __findTile(self,tile):
         return load("Tile_"+tile)
+    def addEntry(self,tile,tileFileName):
+        if self.__tiles.get(tile)==None:
+            self.__tiles[tile] = tileFileName
     
-    
-TileDictionary = TileDict()
+class TileRegistry:
+    def __init__(self):
+        self.__tiles = {}
+        self.tileDict = TileDict()
+    def register(self,tile):
+        self.__tiles[tile.ID()] = tile
+        for dict in tile.genorateTextures():
+            self.registerTexture(dict["id"],dict["file"])
+
+    def registerFloorTexture(self,floorID,floorFilename):
+        self.tileDict.addEntry(floorID,floorFilename)
+    def registerTexture(self,ID,Filename):
+        self.tileDict.addEntry(ID,Filename)
+    def tile(self,tile):
+        return self.__tiles[tile].clone()
+TileReg = TileRegistry()
 
 
 

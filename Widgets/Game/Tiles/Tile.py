@@ -1,9 +1,10 @@
-from .TileHelp import TileDictionary
+from .TileHelp import TileReg
 from PyQt6.QtCore import *
 from PyQt6.QtGui import *
 from Utils.Numbers import centerImage
 from .TileVARS import *
 from Vars.GLOBAL_VARS import SIZE
+import math
 
 
 
@@ -13,6 +14,7 @@ class Tile:
     __floor = "air"
     def __init__(self,tilemap,id,floor="air") -> None:
         """A Tile object, the basis of the Tile system."""
+        
 
         # Set Tile ID and Floor ID.
         if id != None:
@@ -41,9 +43,9 @@ class Tile:
         self.__LIST = tilemap
 
         # Setup textures
-        self.__icon = TileDictionary.getTileImg("air")
-        self.__floorIcon =  TileDictionary.getTileImg(self.__floor)
-        self.__lightIcon = TileDictionary.getTileImg("air")
+        self.__icon = TileReg.tileDict.getTileImg("air")
+        self.__floorIcon =  TileReg.tileDict.getTileImg(self.__floor)
+        self.__lightIcon = TileReg.tileDict.getTileImg("air")
 
         # Texture mode, used to prevent texture calculation errors while initating Tiles.
         self.___TexMode = False
@@ -55,7 +57,7 @@ class Tile:
 
     def fixLight(self,s=""):
         if s!=self.lightConnections():
-            self.__lightIcon = TileDictionary.getTileImg("dark_"+self.lightConnections())
+            self.__lightIcon = TileReg.tileDict.getTileImg("dark_"+self.lightConnections())
 
     # Get Light Level
     def light(self):
@@ -129,7 +131,7 @@ class Tile:
         if self.___TexMode==False:return
 
         # Recalculate the Tile's texture
-        self.__icon = TileDictionary.getTileImg(self.__id+("_"+self.connections() if self.connectionMode() else ""))
+        self.__icon = TileReg.tileDict.getTileImg(self.__id+("_"+self.connections() if self.connectionMode() else ""))
 
     # Get Floor ID
     def floorID(self):
@@ -138,7 +140,7 @@ class Tile:
     # Set Floor ID
     def setFloorID(self,ID):
         self.__floor = ID
-        self.__floorIcon = TileDictionary.getTileImg(self.__floor)
+        self.__floorIcon = TileReg.tileDict.getTileImg(self.__floor)
 
     # Set TileMap
     def setList(self,list):
@@ -190,14 +192,29 @@ class Tile:
     
     # Create a new tile of the same data as this tile.
     def copy(self):
-        t = TileBuilder(self.list(),self.ID(),self.floorID()).build()
+        t:Tile = TileBuilder(self.list(),self.ID(),self.floorID()).light(self.light()).build()
         t.setPos(self.pos())
         t.setConnections(self.connections())
-        t.setLight(self.light())
         return t
     
+    # Create a copy of this object, with the same ID, FloorID, and LIST. Prevents errors that arrise from circular references.
+    def clone(self):
+        return self.__class__(self.list(),self.ID(),self.floorID())
+    
+    # Returns a generator for IDs and Textures for this tile.
+    def genorateTextures(self):
+        if self.connectionMode():
+            for x in range(16):
+
+                # Calculate ID, first ID, then an _, then 0s to replace all the missing zeros from the "bin" function.
+                s = self.ID()+"_"+("0"*(4-max(1,math.ceil(math.log2(x+1)))))+bin(x)[2:]
+                yield {"id":s,"file":s}
+        else:
+            yield {"id":self.ID(),"file":self.ID()}
+
+    
 class Solid(Tile):
-    def __init__(self, tilemap,id, floor) -> None:
+    def __init__(self, tilemap,id, floor="air") -> None:
         super().__init__(tilemap,id, floor)
         self.setCollision(SOLID)
         self.setConnectionMode(CONNECTIONS)
@@ -215,12 +232,12 @@ class TileBuilder:
         return self
     def build(self):
         # Add code for custom tiles, like the "stair" tile.
-        if self.__id=="stone":
-            tile = Solid(self.__tilemap,self.__id,self.__floor)
-        else:
-            tile = Tile(self.__tilemap,self.__id,self.__floor)
+        tile = TileReg.tile(self.__id)
+        tile.setList(self.__tilemap)
+        tile.setFloorID(self.__floor)
         if self.__light!=None:
             tile.setLight(self.__light)
         # if self.__coll!=None:
         #     tile.setCollision(self.__coll)
+        
         return tile

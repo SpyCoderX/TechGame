@@ -4,6 +4,7 @@ import math
 from PyQt6.QtCore import QRect, QPoint,QPointF
 from typing import List
 from .TileVARS import *
+from .TileHelp import TileReg
 from Vars.GLOBAL_VARS import SIZE
 
 import json
@@ -104,6 +105,7 @@ class TileMap: # An object that holds all tiles.
             self.setTile(tile.copy(),(0,y),False)
         for y in range(len(self.__TILES)):
             self.setTile(tile.copy(),(len(self.__TILES)-1,y),False)
+        self.fixLighting()
 
     def setTiles(self,tiles:List[List[Tile]]):
         sx = len(tiles[0])
@@ -121,6 +123,7 @@ class TileMap: # An object that holds all tiles.
         return 0<=x<len(self.__TILES[0]) and 0<=y<len(self.__TILES)
 
     def setTile(self,tile:Tile,pos,updateLight=True):
+        tile = tile.copy()
         if not self.isInRange(pos[0],pos[1]): print("Error: Unable to set tile out of bounds."); return
         tile.setPos(pos)
         tile.setList(self)
@@ -175,8 +178,7 @@ class TileMap: # An object that holds all tiles.
         if self.isInRange(x,y):
             return self.__TILES[y][x]
         else:
-            t = Tile("air","air")
-            return Tile("air","air")
+            return TileReg.tile("air")
     
 
 

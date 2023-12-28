@@ -8,13 +8,14 @@ class BaseW(QMainWindow,Base.Widget):
     def __init__(self) -> None:
         super().__init__()
         self.setWindowTitle("Parallel Processing")
-        self.timer = Ticker.Ticker(self)
         screen = Screen.Screen()
         self.cscreen = screen
         self.setCentralWidget(screen)
-        self.setWindowState(Qt.WindowState.WindowMaximized)
         self.resize(screen.size())
+        self.setWindowState(Qt.WindowState.WindowMaximized)
         self.center()
+        self.timer = Ticker.Ticker(self)
+        self.old_size = self.size()
     def center(self):
         """centers the window on the screen"""
 
@@ -27,25 +28,13 @@ class BaseW(QMainWindow,Base.Widget):
         self.cscreen.setMousePos(a0.position().toPoint())
         return super().mouseMoveEvent(a0)
     def timerEvent(self, a0: QTimerEvent) -> None:
+        if self.size()!=self.old_size:
+            self.cscreen.events.append({"type":"SizeChange","size":self.size(),"oldSize":self.old_size})
         self.cscreen.update()
+        self.old_size = self.size()
     def keyPressEvent(self, a0: QKeyEvent) -> None:
-        
-        if a0.key()==Qt.Key.Key_W:
-            self.cscreen.keys["w"] = True
-        elif a0.key()==Qt.Key.Key_A:
-            self.cscreen.keys["a"] = True
-        elif a0.key()==Qt.Key.Key_S:
-            self.cscreen.keys["s"] = True
-        elif a0.key()==Qt.Key.Key_D:
-            self.cscreen.keys["d"] = True
-        else:
-            self.cscreen.key_presses.append(a0.key())
+        self.cscreen.events.append({"type":"Keydown","key":a0.key()})
     def keyReleaseEvent(self, a0: QKeyEvent) -> None:
-        if a0.key()==Qt.Key.Key_W:
-            self.cscreen.keys["w"] = False
-        elif a0.key()==Qt.Key.Key_A:
-            self.cscreen.keys["a"] = False
-        elif a0.key()==Qt.Key.Key_S:
-            self.cscreen.keys["s"] = False
-        elif a0.key()==Qt.Key.Key_D:
-            self.cscreen.keys["d"] = False
+        self.cscreen.events.append({"type":"Keyup","key":a0.key()})
+    
+    

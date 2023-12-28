@@ -11,14 +11,14 @@ class Screen(Widget):
         super().__init__()
         self.setMinimumSize(600,400)
         self.game = Game.MainGame()
-        l = QStackedLayout()
-        l.addWidget(self.game)
-        self.setLayout(l)
-        self.keys = {"w":False,"a":False,"s":False,"d":False}
-        self.key_presses = []
+        self.events = []
 
         
     def paintEvent(self, a0: QPaintEvent) -> None:
         self.game.tick(self)
+    def getEvents(self):
+        for event in self.events:
+            yield event
+        self.events.clear()
     
     

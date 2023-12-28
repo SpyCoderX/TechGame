@@ -25,10 +25,11 @@ Create:
 
 Camera.py - DONE
 
-PauseUI.pyd
+PauseUI.py
 OverlayUI.py
 StartMenuUI.py
-Mode.py (For the current mode, Start Menu, In Game, Pause Menu, Shop Menu)
+Mode.py (For the current mode, Sta
+rt Menu, In Game, Pause Menu, Shop Menu)
 Layer.py (Current layer/level (Normal/parallel))
 LevelLoader.py (Level loader, loads from a built-in set of levels)
 Levels/Level-<number>.json (The built-in levels)

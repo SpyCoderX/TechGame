@@ -8,10 +8,12 @@ from Widgets.Game.Camera import Cam
 from Widgets.Game.Entity import EntityList
 from Widgets.Game.Entity.Player import Player
 from Widgets.Game.Level import LevelLoader,Level,LevelBuilder
-from Widgets.Game.Tiles.Tile import TileBuilder
+from Widgets.Game.Tiles.Tile import TileBuilder,Tile,Solid
+from Widgets.Game.Tiles.TileHelp import TileReg
 from Utils.Images import load
 from Utils import Numbers
 import math
+from .Menu import ScreenController
 #imports ^
 
 from Vars.GLOBAL_VARS import PLAYER_SPEED,CAMERA_FRICTION_MULTIPLIER
@@ -19,10 +21,12 @@ from Vars.GLOBAL_VARS import PLAYER_SPEED,CAMERA_FRICTION_MULTIPLIER
 
 VIGNETTE = None # Vignette effect (Pronounced Vin-ye-t)
 
+TileReg.register(Solid(None,"stone"))
+TileReg.register(Tile(None,"air"))
 
-class MainGame(Widget):
+
+class MainGame(ScreenController):
     """Controls the updating and rendering of Tiles, Entities, and UIs"""
-    vin = False
     def __init__(self) -> None:
         super().__init__()
         self.baseLevel = LevelBuilder((50,50)).setWalls("stone").setFloor("darkstone").build() # LevelLoader("default").level()
@@ -31,26 +35,28 @@ class MainGame(Widget):
         self.Player = Player(100) # Player instance
         spawn = self.currentLevel.tileMap().spawn()
         self.Player.pos.setAll(spawn[0],spawn[1])
-        global VIGNETTE
-        
-        self.rScreen = None # Reference to the widget that displays to the window. Allows other objects to write to the widget easily.
         self.camera = Cam(self.Player.pos) # Camera for position of all objects. NOTE: SETUP CAMERA BASED ON PLAYER SPAWN LOCATION
-        
+        self.playerMovement = {"Horizontal":0,"Vertical":0}
     def tick(self,screen:Widget):
-        if self.rScreen==None:
-            global VIGNETTE
-            VIGNETTE = load("Vignette").scaled(screen.frameGeometry().size())
-        self.rScreen = screen
+        super().preTick(screen)
         self.camera.setSize([self.rScreen.frameGeometry().width(),self.rScreen.frameGeometry().height()])
-        self.fill(screen,self.getBrush(QColor(0,0,0,255)))
-        self.updates()
-        self.renders()
+        super().tick(screen)
         
 
-    # Main update function
-    def updates(self):
-        for x in range(len(self.rScreen.key_presses)):
-            key = self.rScreen.key_presses.pop(0)
+    def handleEvent(self,event):
+        if event["type"]=="Keydown":
+            key = event["key"]
+
+            if key==Qt.Key.Key_W:
+                self.playerMovement["Vertical"] -= 1
+            if key==Qt.Key.Key_S:
+                self.playerMovement["Vertical"] += 1
+            if key==Qt.Key.Key_A:
+                self.playerMovement["Horizontal"] -= 1
+            if key==Qt.Key.Key_D:
+                self.playerMovement["Horizontal"] += 1
+
+
             if key==Qt.Key.Key_G:
                 point = Numbers.addPoints(self.rScreen.mousePos(),self.camera.pos())
                 tile = self.currentLevel.tileMap().getTile(point.x(),point.y())
@@ -71,15 +77,31 @@ class MainGame(Widget):
                 tile = self.currentLevel.tileMap().getTile(point.x(),point.y())
                 tile.setLight(1)
                 self.currentLevel.tileMap().setTile(tile,tile.pos())
+
+        if event["type"]=="Keyup":
+            key = event["key"]
+
+            if key==Qt.Key.Key_W:
+                self.playerMovement["Vertical"] += 1
+            if key==Qt.Key.Key_S:
+                self.playerMovement["Vertical"] -= 1
+            if key==Qt.Key.Key_A:
+                self.playerMovement["Horizontal"] += 1
+            if key==Qt.Key.Key_D:
+                self.playerMovement["Horizontal"] -= 1
+        super().handleEvent(event)
+
+    # Main update function
+    def updates(self):
         self.currentLevel.update(self)
         self.updatePlayer()
-        self.ui_update()
         self.updateCamera()
+        super().updates()
 
     def updatePlayer(self):
         # Get player input 
-        horizontal = self.rScreen.keys["d"]-self.rScreen.keys["a"]
-        vertical = self.rScreen.keys["s"]-self.rScreen.keys["w"]
+        horizontal = self.playerMovement["Horizontal"]
+        vertical = self.playerMovement["Vertical"]
 
         # Update player acceleration
         self.Player.acceleration.setAll(horizontal*PLAYER_SPEED,vertical*PLAYER_SPEED)
@@ -115,19 +137,10 @@ class MainGame(Widget):
         # combines pos and pPos to calculate a new camera position
         self.camera.setPos(c)
     
-    def ui_update(self):
-        pass
-
+    
     def renders(self):
         self.currentLevel.render(self)
         self.Player.render(self)
-        self.vignette()
-        self.ui_render(self)
+        super().renders()
 
-    def vignette(self):
-        if self.vin: return
-        p:QPainter = self.rScreen.getThisPainter()
-        p.drawImage(QPoint(0,0),VIGNETTE)
-
-    def ui_render(self,screen:Widget):
-        pass
+    
