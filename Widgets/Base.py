@@ -25,6 +25,7 @@ class Object:
     
     def fill(self,a0:QPaintDevice,a1:QBrush):
         painter = self.getPainter(a0)
+        
         rect = QRect(0, 0, painter.device().width(), painter.device().height())
         painter.fillRect(rect, a1)
     

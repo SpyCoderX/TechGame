@@ -10,7 +10,7 @@ class BaseW(QMainWindow,Base.Widget):
         self.setWindowTitle("Parallel Processing")
         screen = Screen.Screen()
         self.cscreen = screen
-        self.setCentralWidget(screen)
+        self.setCentralWidget(self.cscreen)
         self.resize(screen.size())
         self.setWindowState(Qt.WindowState.WindowMaximized)
         self.center()

@@ -14,6 +14,7 @@ from Utils.Images import load
 from Utils import Numbers
 import math
 from .Menu import ScreenController
+from .UI import Gui
 #imports ^
 
 from Vars.GLOBAL_VARS import PLAYER_SPEED,CAMERA_FRICTION_MULTIPLIER
@@ -27,8 +28,8 @@ TileReg.register(Tile(None,"air"))
 
 class MainGame(ScreenController):
     """Controls the updating and rendering of Tiles, Entities, and UIs"""
-    def __init__(self) -> None:
-        super().__init__()
+    def __init__(self,screen) -> None:
+        super().__init__(screen)
         self.baseLevel = LevelBuilder((50,50)).setWalls("stone").setFloor("darkstone").build() # LevelLoader("default").level()
         self.overLevel = LevelBuilder((20,20)).setWalls("stone").setFloor("darkstone").build() # LevelLoader("default_over").level()
         self.currentLevel = self.baseLevel
@@ -37,8 +38,8 @@ class MainGame(ScreenController):
         self.Player.pos.setAll(spawn[0],spawn[1])
         self.camera = Cam(self.Player.pos) # Camera for position of all objects. NOTE: SETUP CAMERA BASED ON PLAYER SPAWN LOCATION
         self.playerMovement = {"Horizontal":0,"Vertical":0}
+        
     def tick(self,screen:Widget):
-        super().preTick(screen)
         self.camera.setSize([self.rScreen.frameGeometry().width(),self.rScreen.frameGeometry().height()])
         super().tick(screen)
         

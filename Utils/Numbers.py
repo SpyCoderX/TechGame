@@ -19,6 +19,13 @@ def toTilePos(pos):
 def tileToGlobalPos(x,y):
     return [x*SIZE,y*SIZE]
 
+def smoothAngles(a,b,val):
+    """Returnes an angle that is between a and b."""
+    diff = ((b-a)%360)
+    if diff > 180: diff -= 180
+    c = (a-diff)*val+a*(1-val)
+    return c
+
 
 class Loc(QPointF):
     R = 0
