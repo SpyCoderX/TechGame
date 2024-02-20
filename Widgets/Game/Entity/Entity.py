@@ -125,6 +125,11 @@ class Entity(Object):
         p.rotate(self.pos.R)
         p.drawImage(centerImage(QPoint(0,0),img),img)
         p.rotate(-self.pos.R)
+        p.drawEllipse(QRectF((-self.ABBox[0]/2),
+                          (-self.ABBox[1]/2),
+                          (self.ABBox[0]),
+                          (self.ABBox[1])))
+        
 
 
     def getImage(self): # Override this function in other entities to allow modification of the image, or for animations.
@@ -132,5 +137,5 @@ class Entity(Object):
     
 
     def delete(self):
-        self.list().remove(self)
+        self.list().remove_entity(self)
         del self

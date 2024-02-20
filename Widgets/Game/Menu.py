@@ -66,16 +66,16 @@ class MainMenu(ScreenController):
     def __init__(self,screen) -> None:
         super().__init__(screen)
         w = Widget()
-        l = QHBoxLayout()
+        l = QVBoxLayout()
         l.setContentsMargins(0,0,0,0)
         class Banner(Widget):
             def paintEvent(self, a0: QPaintEvent) -> None:
                 self.fillThis(QBrush(QColor(0,0,0,100)))
         w2 = Banner()
-        w2.setFixedWidth(200)
+        w2.setFixedHeight(200)
         t = QPushButton()
         t.setText("Title (Placeholder)")
-        l2 = QVBoxLayout()
+        l2 = QHBoxLayout()
         w3 = QWidget()
         w3.setFixedHeight(100)
         l2.addWidget(w3)
@@ -86,7 +86,7 @@ class MainMenu(ScreenController):
         l2.addWidget(QWidget())
         w2.setLayout(l2)
         w3 = QWidget()
-        w3.setFixedWidth(300)
+        w3.setFixedHeight(600)
         l.addWidget(w3)
         l.addWidget(w2)
         l.addWidget(QWidget())

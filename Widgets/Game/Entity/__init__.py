@@ -15,7 +15,8 @@ class EntityList:
 
 
     def remove_entity(self,entity):
-        self.__LIST.remove(entity)
+        if entity in self.__LIST: self.__LIST.remove(entity)
+        self.tree.remove(entity)
 
 
     def get_entities(self):
@@ -24,6 +25,7 @@ class EntityList:
 
     def clear_entities(self):
         self.__LIST = []
+        self.tree = AABBTree()
 
 
     def update(self,game):
@@ -35,6 +37,7 @@ class EntityList:
     def render(self,game):
         for e in self.__LIST:
             e.render(game)
+        
 
     def contains(self,entity) -> bool:
         return self.__LIST.count(entity)>0

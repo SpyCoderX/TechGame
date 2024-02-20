@@ -6,6 +6,7 @@ from PyQt6.QtWidgets import *
 from Widgets.Base import Widget
 from Widgets.Game.Camera import Cam
 from Widgets.Game.Entity import EntityList
+from Widgets.Game.Entity.More.BaseEnemy import BaseEnemy
 from Widgets.Game.Entity.Player import Player
 from Widgets.Game.Level import LevelLoader,Level,LevelBuilder
 from Widgets.Game.Tiles.Tile import TileBuilder,Tile,Solid
@@ -78,6 +79,14 @@ class MainGame(ScreenController):
                 tile = self.currentLevel.tileMap().getTile(point.x(),point.y())
                 tile.setLight(1)
                 self.currentLevel.tileMap().setTile(tile,tile.pos())
+            if key == Qt.Key.Key_U:
+                base = BaseEnemy(load("enemy").scaled(128,128),20)
+                base.ABBox = [128,128]
+                mpos = self.rScreen.mousePos()
+                base.pos.setAll(mpos.x()+self.camera.pos().x(),mpos.y()+self.camera.pos().y())
+                base.setTarget(self.Player)
+                self.currentLevel.entitylist().add_entity(base)
+            
 
         if event["type"]=="Keyup":
             key = event["key"]
@@ -101,11 +110,12 @@ class MainGame(ScreenController):
 
     def updatePlayer(self):
         # Get player input 
+        val = PLAYER_SPEED*(0.4 if self.Player.isAttacking() else 1)
         horizontal = self.playerMovement["Horizontal"]
         vertical = self.playerMovement["Vertical"]
 
         # Update player acceleration
-        self.Player.acceleration.setAll(horizontal*PLAYER_SPEED,vertical*PLAYER_SPEED)
+        self.Player.acceleration.setAll(horizontal*val,vertical*val)
 
         # Grab camera position
         p1 = self.camera.pos()
@@ -121,8 +131,12 @@ class MainGame(ScreenController):
         p2 = [p2[0]-p1[0],p2[1]-p1[1]]
         # Calculate direction from player to mouse
         r = math.atan2(p3[1]-p2[1],p3[0]-p2[0])
+        r1 = [math.cos(r),math.sin(r)]
+        r2 = [math.cos(math.radians(self.Player.pos.R)),math.sin(math.radians(self.Player.pos.R))]
+        val = 0.05 if self.Player.isAttacking() else 0.2
+        r3 = [r1[x]*val+r2[x]*(1-val) for x in range(2)]
         # Set player rotation
-        self.Player.pos.R=math.degrees(r)
+        self.Player.pos.R=math.degrees(math.atan2(r3[1],r3[0]))
         # Update Player
         self.Player.update(self)
 
@@ -143,5 +157,11 @@ class MainGame(ScreenController):
         self.currentLevel.render(self)
         self.Player.render(self)
         super().renders()
+        self.overlay()
+    def overlay(self):
+        p = self.rScreen.getThisPainter()
+        p.setPen(QColor(255,255,255,255))
+        p.drawText(10,(self.rScreen.height()-20),100,30,0,"v1.0 - Tech-Game")
+        p.drawText(self.rScreen.width()-130,(self.rScreen.height()-120),130,120,0,"Keys:\n├[WASD] - Movement\n├[Y/H] - Darkness\n├[T/G] - Block\n├[U] - Spawn Entity\n├[Z] - Toggle Vignette\n└[Left Click] - Sword")
 
     

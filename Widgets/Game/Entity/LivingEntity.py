@@ -13,16 +13,26 @@ class LivingEntity(Entity):
         super().__init__(img)
         self.__health = health
         self.__maxHealth = health
+        self.__invulnerable_frames = 0
 
+    def update(self, game: Widget):
+        if self.__invulnerable_frames>0: self.__invulnerable_frames-=1
+        super().update(game)
 
         # Modification of health
     def damage(self,amount):
+        if self.iFrames()>0: return
         self.__change_health(min(-amount,0))
+        self.velocity = self.velocity.multiply(0.5)
+        self.acceleration = self.acceleration.multiply(0.5)
+        self.set_iFrames(5)
 
     def heal(self,amount):
         self.__change_health(max(amount,))
-
-
+    def iFrames(self):
+        return self.__invulnerable_frames
+    def set_iFrames(self,iFrames):
+        self.__invulnerable_frames = iFrames
         # Get/Set health
     def setHealth(self,amount:int):
         self.__setHealth(amount)

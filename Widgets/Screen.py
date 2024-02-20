@@ -17,7 +17,7 @@ class Screen(Widget):
         self.mainMenuController = Menu.MainMenu(self)
 
         # Controller that is currently active.
-        self.setController(self.mainMenuController)
+        self.setController(self.gameController)
 
         # List of all events (Keypresses, size changes, etc.) that have occured since the last time #getEvents() was called.
         self.events = []
