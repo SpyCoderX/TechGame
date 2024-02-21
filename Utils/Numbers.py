@@ -1,8 +1,10 @@
 from PyQt6.QtCore import *
 from PyQt6.QtGui import *
 from typing import overload
-from Vars.GLOBAL_VARS import SIZE
 
+from PyQt6.QtGui import QVector2D
+from Vars.GLOBAL_VARS import SIZE
+import math
 
 def centerImage(Point:QPoint,Image:QImage):
     return QPointF(Point.x()-Image.width()/2,Point.y()-Image.height()/2)
@@ -26,6 +28,11 @@ def smoothAngles(a,b,val):
     c = (a-diff)*val+a*(1-val)
     return c
 
+def distFromList(a,b):
+    return math.sqrt((a[0]-b[0])**2+(a[1]-b[1])**2)
+
+def distFromPoint(a,b):
+    return math.sqrt((a.x()-b.x())**2+(a.y()-b.y())**2)
 
 class Loc(QPointF):
     R = 0
@@ -82,6 +89,11 @@ class Vector2D(QVector2D):
         return b
     def add(self,a,b):
         self.setAll(self.x()+a,self.y()+b)
+    
+    def normalized(self):
+        vec = super().normalized()
+        new = Vector2D(vec.x(),vec.y())
+        return new
         
         
     

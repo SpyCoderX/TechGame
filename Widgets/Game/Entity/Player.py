@@ -49,13 +49,11 @@ class Player(LivingEntity):
                 for AB in ABs:
                     ent = AB.obj
                     if isinstance(ent,LivingEntity):
-                        if math.sqrt((ent.pos.x()-pos1[0])**2+(ent.pos.y()-pos1[1])**2)<=20+min(ent.ABBox)/2:
-                            ent.damage(5)
-                        elif math.sqrt((ent.pos.x()-pos2[0])**2+(ent.pos.y()-pos2[1])**2)<=20+min(ent.ABBox)/2:
-                            ent.damage(5)
-                        elif math.sqrt((ent.pos.x()-pos3[0])**2+(ent.pos.y()-pos3[1])**2)<=20+min(ent.ABBox)/2:
-                            ent.damage(5)
-
+                        vec = ent.pos.subtractPoint(self.pos.toPoint()).toVec().normalized().multiply(8)
+                        if (math.sqrt((ent.pos.x()-pos1[0])**2+(ent.pos.y()-pos1[1])**2)<=20+min(ent.ABBox)/2 or
+                            math.sqrt((ent.pos.x()-pos2[0])**2+(ent.pos.y()-pos2[1])**2)<=20+min(ent.ABBox)/2 or
+                            math.sqrt((ent.pos.x()-pos3[0])**2+(ent.pos.y()-pos3[1])**2)<=20+min(ent.ABBox)/2):
+                            if ent.damage(5): ent.acceleration = ent.acceleration.addVec(vec)
         else:
             if self.__attack_cooldown>0:
                 self.__attack_cooldown-=1

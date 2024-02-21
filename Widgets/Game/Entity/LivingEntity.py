@@ -21,11 +21,10 @@ class LivingEntity(Entity):
 
         # Modification of health
     def damage(self,amount):
-        if self.iFrames()>0: return
+        if self.iFrames()>0: return False
         self.__change_health(min(-amount,0))
-        self.velocity = self.velocity.multiply(0.5)
-        self.acceleration = self.acceleration.multiply(0.5)
-        self.set_iFrames(5)
+        self.set_iFrames(15)
+        return True
 
     def heal(self,amount):
         self.__change_health(max(amount,))
@@ -63,5 +62,8 @@ class LivingEntity(Entity):
     def __setHealth(self,a):
         self.__health= max(min(a,self.__maxHealth),0)
         if self.__health==0:
+            self.death()
             self.delete()
+    def death(self):
+        pass
         

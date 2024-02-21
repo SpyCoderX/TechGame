@@ -100,9 +100,9 @@ class Entity(Object):
             c = check(self,pos,False)
             pos.setY(c.y())
             self.pos = pos
-            self.updateAcceleration()
+            self.updateAcceleration(game)
 
-    def updateAcceleration(self):
+    def updateAcceleration(self,game):
         self.acceleration = self.acceleration.multiply(0.7)
         
 

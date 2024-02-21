@@ -161,7 +161,7 @@ class AABBLeaf(AABB):
             if upper.left==self: upper.left = None
             if upper.right==self: upper.right = None
             upper.recalcUp()
-            #
+            
     def draw(self, screen):
         super().draw(screen)
         mx,my = pygame.mouse.get_pos()
