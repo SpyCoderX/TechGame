@@ -46,6 +46,8 @@ class Material:
         return self.__Health
     def getDamageable(self):
         return self.__Damageable
+    def getStacksize(self):
+        return self.__StackSize
 class ItemStack:
     __Material:Material
     __Count:int = 16
@@ -58,8 +60,8 @@ class ItemStack:
         return self.__Count
     def getMaterial(self):
         return self.__Material
-    def getHealth(self):
-        return self.__Health
+    def getDamage(self):
+        return self.__Damage
     def getUnbreakable(self):
         return self.__Unbreakable
     def __modify_damage(self,amount):
@@ -82,6 +84,11 @@ class ItemStack:
     def setCount(self,count:int):
         self.__Count = int(count)
         return self
+    def clone(self):
+        i = ItemStack(self.getMaterial(),self.getCount())
+        i.damage(self.getDamage())
+        i.setUnbreakable(self.getUnbreakable())
+        return i
 class Item(Entity):
     __Stack:ItemStack
     def __init__(self, stack:ItemStack):
@@ -104,8 +111,11 @@ class Item(Entity):
             self.velocity = self.velocity.addVec(v)
             return super().updateAcceleration(game)
     def collect(self,game):
-        game.Player.inventory.add(self.__Stack)
-        self.delete()
+        if game.Player.inventory.add(self.__Stack): 
+            self.delete()
+        else:
+            self.velocity = self.velocity.multiply(-1)
+            self.acceleration = self.acceleration.multiply(-1)
 def get_item_texture(str):
     return load("Item_"+str).scaled(64,64)
 MATERIALS = MaterialList()

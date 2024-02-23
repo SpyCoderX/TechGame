@@ -66,7 +66,7 @@ class PlayerInventoryGUI(InventoryGUI):
         super().__init__(inventory,game)
     def createSlots(self):
         for x in range(len(self.Inventory.slots())):
-            self.createSlot(Slot([(x%5)*144-(288),math.floor(x/5)*144-72],[128,128],x,self))
+            self.createSlot(Slot([(x%5)*(SCALE*16+16)-(SCALE*16+16)*2,math.floor(x/5)*(SCALE*16+16)-(SCALE*8+8)*3],[SCALE*16,SCALE*16],x,self))
     def renderBackground(self):
         paint = self.getThisPainter()
         paint.drawImage(QRectF(centerImage(QPointF(self.Game.rScreen.width()/2,self.Game.rScreen.height()/2),PLAYER_INV_IMAGE),QSizeF(PLAYER_INV_IMAGE.size())),PLAYER_INV_IMAGE)
@@ -74,7 +74,12 @@ class PlayerInventoryGUI(InventoryGUI):
         super().renderSlots()
         paint = self.getThisPainter()
         pos = self.Game.rScreen.mousePos()
-        if self.Inventory.mouseSlot(): paint.drawImage(QRectF(QPointF(pos.x()-SCALE*15*0.5,pos.y()-SCALE*16*0.5),QSizeF(SCALE*16,SCALE*16)),self.Inventory.mouseSlot().getMaterial().getImage())
+        if self.Inventory.mouseSlot(): 
+            paint.drawImage(QRectF(QPointF(pos.x()-SCALE*15*0.5,pos.y()-SCALE*16*0.5),QSizeF(SCALE*16,SCALE*16)),self.Inventory.mouseSlot().getMaterial().getImage())
+            paint.scale(4,4)
+            paint.setPen(QColor(200,200,200,255))
+            paint.drawText(QPointF((pos.x()-SCALE*15*0.5-8)/4,(pos.y()+SCALE*16*0.5)/4),str(self.Inventory.mouseSlot().getCount()))
+            
 class Inventory:
     __Slots = []
     __Size = 0
@@ -93,10 +98,33 @@ class Inventory:
         if slot>=len(self.__Slots): return None
         self.__Slots[slot] = itemStack
     def add(self,itemStack):
-        if self.__Slots.count(None):
-            self.__Slots[self.__Slots.index(None)] = itemStack
-
-        # Add functionality for adding items to existing stacks. ---------------------------------------------------------------------
+        x = 0
+        for slot in self.__Slots:
+            if itemStack.getCount()<1:
+                return True
+            if slot:
+                if slot.getMaterial()==itemStack.getMaterial():
+                    count = slot.getCount()+itemStack.getCount()
+                    size = slot.getMaterial().getStacksize()
+                    overflow = count-size
+                    slot.setCount(count if count<=size else size)
+                    itemStack.setCount(overflow)
+            else:
+                if itemStack.getCount()>itemStack.getMaterial().getStacksize():
+                    stack = itemStack.copy()
+                    stack.setCount(stack.getMaterial().getStacksize())
+                    self.__Slots[x] = stack
+                    itemStack.setCount(itemStack.getCount()-itemStack.getMaterial().getStacksize())
+                else:
+                    self.__Slots[x] = itemStack
+                    return True
+            x+=1
+        return False
+        
+            
+    def drop(self,itemStack):
+        pass
+    # Do smth
     def remove(self,itemStack):
         if self.__Slots.count(itemStack):
             self.__Slots.remove(itemStack)
@@ -111,7 +139,7 @@ class Inventory:
 class PlayerInventory(Inventory):
     __mouse = None
     def __init__(self) -> None:
-        super().__init__("Inventory",10)
+        super().__init__("Inventory",20)
     def mouseSlot(self):
         return self.__mouse
     def setMouseSlot(self,itemStack):
@@ -198,20 +226,72 @@ class Slot:
             self.hovered = True
         else:
             self.hovered = False
-        if inventory.Game.rScreen.mouseButton(0):
-            if not self.__Pressed and self.hovered:
-                if self.mouseSlot():
+        if inventory.Game.rScreen.mouseButton(0) or inventory.Game.rScreen.mouseButton(2):
+            if inventory.Game.rScreen.mouseButton(0):
+                if not self.__Pressed and self.hovered:
                     item = self.itemStack()
-                    self.setItemStack(self.mouseSlot())
-                    self.setMouseSlot(item)
-                else:
-                    self.setMouseSlot(self.itemStack())
-                    self.setItemStack(None)
+                    if self.mouseSlot():
+                        if item:
+                            if item.getMaterial()==self.mouseSlot().getMaterial():
+                                count = item.getCount()+self.mouseSlot().getCount()
+                                maxcount = self.mouseSlot().getMaterial().getStacksize()
+                                if count<=maxcount:
+                                    self.itemStack().setCount(count)
+                                    self.setMouseSlot(None)
+                                else:
+                                    self.itemStack().setCount(maxcount)
+                                    self.mouseSlot().setCount(count-maxcount)
+                            else:
+                                self.setItemStack(self.mouseSlot())
+                                self.setMouseSlot(item)
+                        else:
+                            self.setItemStack(self.mouseSlot())
+                            self.setMouseSlot(item)
+                    else:
+                        self.setItemStack(self.mouseSlot())
+                        self.setMouseSlot(item)
+            else:
+                if not self.__Pressed and self.hovered:
+                    item = self.itemStack()
+                    
+                    if self.mouseSlot():
+                        if item:
+                            if self.mouseSlot().getMaterial()==item.getMaterial():
+                                if item.getCount()<item.getMaterial().getStacksize():
+                                    if self.mouseSlot().getCount()<=1:
+                                        self.itemStack().setCount(item.getCount()+self.mouseSlot().getCount())
+                                    else:
+                                        self.itemStack().setCount(item.getCount()+1)
+                                        self.mouseSlot().setCount(self.mouseSlot().getCount()-1)
+                            else:
+                                self.setItemStack(self.mouseSlot())
+                                self.setMouseSlot(item)
+                        else:
+                            self.setItemStack(self.mouseSlot().clone().setCount(1))
+                            self.mouseSlot().setCount(self.mouseSlot().getCount()-1)
+                            if self.mouseSlot().getCount()<=0:
+                                self.setMouseSlot(None)
+                    elif item:
+                        count = self.itemStack().getCount()
+                        diff = math.ceil(count/2)
+                        self.setMouseSlot(self.itemStack().clone().setCount(diff))
+                        if count-diff>0:
+                            self.itemStack().setCount(count-diff)
+                        else:
+                            self.setItemStack(None)
             self.__Pressed = True
         elif not inventory.Game.rScreen.mouseButton(0):
             self.__Pressed = False
             
     def render(self,inventory):
         paint:QPainter = inventory.getThisPainter()
-        paint.drawImage(QRectF(QPointF(self.pos()[0]-self.size()[0]/2+inventory.Game.rScreen.width()/2,self.pos()[1]-self.size()[1]/2+inventory.Game.rScreen.height()/2),QSizeF(self.size()[0],self.size()[0])),SLOT_IMAGE_HOVER if self.hovered else SLOT_IMAGE)
-        if self.itemStack(): paint.drawImage(QRectF(QPointF(self.pos()[0]-self.size()[0]*0.4+inventory.Game.rScreen.width()/2,self.pos()[1]-self.size()[1]*0.4+inventory.Game.rScreen.height()/2),QSizeF(self.size()[0]*0.8,self.size()[1]*0.8)),self.itemStack().getMaterial().getImage())
+        pos = inventory.Game.rScreen.size()
+        pos = QPointF(pos.width()/2,pos.height()/2)
+        paint.translate(pos)
+        paint.drawImage(QRectF(QPointF(self.pos()[0]-self.size()[0]/2,self.pos()[1]-self.size()[1]/2),QSizeF(self.size()[0],self.size()[0])),SLOT_IMAGE_HOVER if self.hovered else SLOT_IMAGE)
+        if self.itemStack(): 
+            paint.drawImage(QRectF(QPointF(self.pos()[0]-self.size()[0]*0.4,self.pos()[1]-self.size()[1]*0.4),QSizeF(self.size()[0]*0.8,self.size()[1]*0.8)),self.itemStack().getMaterial().getImage())
+            paint.scale(4,4)
+            paint.setPen(QColor(200,200,200,255))
+            paint.drawText(QPointF((self.pos()[0]-self.size()[0]*0.4-8)/4,(self.pos()[1]+self.size()[1]*0.4)/4),str(self.itemStack().getCount()))
+            
