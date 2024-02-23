@@ -10,9 +10,10 @@ from Utils.Images import Anim,load
 from Utils.Numbers import Vector2D
 from typing import List
 from Utils.AABB import AABB
+from Widgets.Game.Menus.MenuBases import PlayerInventory
 import os
 import math
-DAGGER = load("dagger_blur")
+DAGGER = load("dagger")
 # Importing PyQt6 stuff, and the other files.
 
 class Player(LivingEntity):
@@ -24,7 +25,10 @@ class Player(LivingEntity):
         self.__selected_item = None # Note: Use self.inventory().held_item() in future once added.
         self.__idle_images = Anim("PlayerIdle") # Idle Animation
         self.__walking_images = Anim("PlayerWalk") # Walking Animation
-        super().__init__(self.__idle_images.images()[0].scaled(128,128),health) # Sets up the entity. Uses the first image in __idle_images as the base image in the entity.
+        p = self.__idle_images.images()[0].scaled(128,128)
+        self.inventory = PlayerInventory()
+        
+        super().__init__(p,health) # Sets up the entity. Uses the first image in __idle_images as the base image in the entity.
         
 
     def update(self, game: Widget):
@@ -66,8 +70,8 @@ class Player(LivingEntity):
             p2.setColor(QColor(255,255,255))
             p.setPen(p2)
             p.translate(self.pos.subtractPoint(game.camera.pos()))
-            for x in self.__attack_points:
-                p  .drawEllipse(int(x[0])-10,int(x[1])-10,20,20)
+            # for x in self.__attack_points:
+            #     p  .drawEllipse(int(x[0])-10,int(x[1])-10,20,20)
             p.rotate(self.pos.R+self.__attack_integral*180-90)
             # rectangle = QRectF(0, -15, 40.0, 30.0)
             # startAngle = int(-22.5 * 16)

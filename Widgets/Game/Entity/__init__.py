@@ -1,6 +1,7 @@
 from typing import List
 from Widgets.Game.Entity.Entity import Entity
 from Utils.AABB import AABBTree
+from .LivingEntity import LivingEntity
 class EntityList:
     __LIST: List[Entity]
     def __init__(self) -> None:
@@ -31,7 +32,8 @@ class EntityList:
     def update(self,game):
         for e in self.__LIST:
             e.update(game)
-            self.tree.update(e.getAB(),e)
+            if isinstance(e, LivingEntity):
+                self.tree.update(e.getAB(),e)
 
 
     def render(self,game):

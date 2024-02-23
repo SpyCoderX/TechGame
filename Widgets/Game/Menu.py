@@ -8,7 +8,6 @@ from Widgets.Base import Widget
 from Utils.Images import load
 import math
 from typing import List
-from .UI.Gui import Gui
 #imports ^
 
 
@@ -36,6 +35,7 @@ class ScreenController(Widget):
 
     def tick(self,screen:Widget):
         self.fill(screen,self.getBrush(QColor(0,0,0,255)))
+        self.preTick(screen)
         self.handleEvents()
         self.updates()
         self.renders()

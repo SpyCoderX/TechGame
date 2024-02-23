@@ -2,10 +2,11 @@ import sys
 from PyQt6.QtCore import *
 from PyQt6.QtGui import *
 from PyQt6.QtWidgets import *
+app = QApplication(sys.argv)
+
+
 from Widgets.Window import BaseW 
 
-
-app = QApplication(sys.argv)
 B = BaseW()
 B.show()
 app.exec()

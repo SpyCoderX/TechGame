@@ -11,11 +11,12 @@ from Widgets.Game.Entity.Player import Player
 from Widgets.Game.Level import LevelLoader,Level,LevelBuilder
 from Widgets.Game.Tiles.Tile import TileBuilder,Tile,Solid
 from Widgets.Game.Tiles.TileHelp import TileReg
+from Widgets.Game.Menus.MenuBases import PlayerInventoryGUI
 from Utils.Images import load
 from Utils import Numbers
 import math
 from .Menu import ScreenController
-from .UI import Gui
+from .Particle.Particle import ParticleList
 #imports ^
 
 from Vars.GLOBAL_VARS import PLAYER_SPEED,CAMERA_FRICTION_MULTIPLIER
@@ -29,6 +30,7 @@ TileReg.register(Tile(None,"air"))
 
 class MainGame(ScreenController):
     """Controls the updating and rendering of Tiles, Entities, and UIs"""
+    __PlayerInvGui = None
     def __init__(self,screen) -> None:
         super().__init__(screen)
         self.baseLevel = LevelBuilder((50,50)).setWalls("stone").setFloor("darkstone").build() # LevelLoader("default").level()
@@ -39,16 +41,20 @@ class MainGame(ScreenController):
         self.Player.pos.setAll(spawn[0],spawn[1])
         self.camera = Cam(self.Player.pos) # Camera for position of all objects. NOTE: SETUP CAMERA BASED ON PLAYER SPAWN LOCATION
         self.playerMovement = {"Horizontal":0,"Vertical":0}
+        self.particles = ParticleList()
         
     def tick(self,screen:Widget):
         self.camera.setSize([self.rScreen.frameGeometry().width(),self.rScreen.frameGeometry().height()])
         super().tick(screen)
-        
+    
 
     def handleEvent(self,event):
         if event["type"]=="Keydown":
             key = event["key"]
-
+            if key==Qt.Key.Key_Escape:
+                if self.__PlayerInvGui:
+                    self.GUIs.removeWidget(self.__PlayerInvGui)
+                    self.__PlayerInvGui = None
             if key==Qt.Key.Key_W:
                 self.playerMovement["Vertical"] -= 1
             if key==Qt.Key.Key_S:
@@ -80,13 +86,21 @@ class MainGame(ScreenController):
                 tile.setLight(1)
                 self.currentLevel.tileMap().setTile(tile,tile.pos())
             if key == Qt.Key.Key_U:
-                base = BaseEnemy(load("enemy").scaled(128,128),20)
-                base.ABBox = [128,128]
+                base = BaseEnemy(load("enemy").scaled(64,64),20)
+                base.ABBox = [64,64]
                 mpos = self.rScreen.mousePos()
                 base.pos.setAll(mpos.x()+self.camera.pos().x(),mpos.y()+self.camera.pos().y())
                 base.setTarget(self.Player)
                 self.currentLevel.entitylist().add_entity(base)
+            if key == Qt.Key.Key_E:
+                if self.__PlayerInvGui:
+                    self.GUIs.removeWidget(self.__PlayerInvGui)
+                    self.__PlayerInvGui = None
+                else:
+                    self.__PlayerInvGui = PlayerInventoryGUI(self.Player.inventory,self)
+                    self.GUIs.addWidget(self.__PlayerInvGui)
             
+
 
         if event["type"]=="Keyup":
             key = event["key"]
@@ -103,9 +117,11 @@ class MainGame(ScreenController):
 
     # Main update function
     def updates(self):
-        self.currentLevel.update(self)
-        self.updatePlayer()
-        self.updateCamera()
+        if not self.__PlayerInvGui:
+            self.currentLevel.update(self)
+            self.updatePlayer()
+            self.particles.update(self)
+            self.updateCamera()
         super().updates()
 
     def updatePlayer(self):
@@ -156,7 +172,9 @@ class MainGame(ScreenController):
     def renders(self):
         self.currentLevel.render(self)
         self.Player.render(self)
+        
         super().renders()
+        self.particles.render(self)
         self.overlay()
     def overlay(self):
         p = self.rScreen.getThisPainter()

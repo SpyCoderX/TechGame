@@ -24,7 +24,6 @@ class Screen(Widget):
 
         
     def paintEvent(self, a0: QPaintEvent) -> None:
-        self.selectedController.preTick(self)
         self.selectedController.tick(self)
 
     def getEvents(self):

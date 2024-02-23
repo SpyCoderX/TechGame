@@ -1,5 +1,5 @@
 from PyQt6.QtGui import QImage
-from Utils.Images import default
+from Utils.Images import default,load
 from Widgets.Base import Widget
 from Widgets.Game.Entity.Entity import Entity
 from Utils.Numbers import QImage, distFromList,distFromPoint,Loc,Vector2D
@@ -99,7 +99,14 @@ class Item(Entity):
             v = game.Player.pos.subtractPoint(self.pos).toVec().normalized().multiply((ITEM_DIST-dist)/4)
             self.velocity = self.velocity.addVec(v)
             return super().updateAcceleration(game)
+        else:
+            v = game.Player.pos.subtractPoint(self.pos).toVec().normalized().multiply(0.0001)
+            self.velocity = self.velocity.addVec(v)
+            return super().updateAcceleration(game)
     def collect(self,game):
+        game.Player.inventory.add(self.__Stack)
         self.delete()
+def get_item_texture(str):
+    return load("Item_"+str).scaled(64,64)
 MATERIALS = MaterialList()
-MATERIALS.addMaterial(Material(name="HMMMF"))
+MATERIALS.addMaterial(Material(get_item_texture("Oak_Log"),name="HMMMF"))

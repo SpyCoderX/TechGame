@@ -90,6 +90,7 @@ class Vector2D(QVector2D):
     def add(self,a,b):
         self.setAll(self.x()+a,self.y()+b)
     
+        return self
     def normalized(self):
         vec = super().normalized()
         new = Vector2D(vec.x(),vec.y())

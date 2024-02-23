@@ -6,24 +6,41 @@ from PyQt6.QtGui import *
 from PyQt6.QtGui import QImage
 from PyQt6.QtWidgets import *
 from Widgets.Base import Object,Widget
-from Utils.Numbers import Loc
+from Utils.Numbers import Loc,Vector2D
+from Widgets.Game.Particle.Particle import DamageParticle
 from . import Entity
+from random import randint
 class LivingEntity(Entity):
     def __init__(self, img: QImage,health):
         super().__init__(img)
         self.__health = health
         self.__maxHealth = health
         self.__invulnerable_frames = 0
+        self.__damage_frames = 0
+
+        c = self.image.copy()
+        paint = QPainter(c)
+        mask = QBitmap(c.createAlphaMask())
+        paint.setClipRegion(QRegion(mask))
+        paint.setPen(QColor(0,0,0,0))
+        paint.setBrush(QColor(255,0,0,150))
+        paint.drawRect(QRectF(0,0,128,128))
+        self.image_hurt = c
+        
 
     def update(self, game: Widget):
         if self.__invulnerable_frames>0: self.__invulnerable_frames-=1
+        if self.__damage_frames>0: self.__damage_frames-=1
         super().update(game)
-
+    def getImage(self):
+        return self.image_hurt if self.__damage_frames else super().getImage()
         # Modification of health
     def damage(self,amount):
         if self.iFrames()>0: return False
         self.__change_health(min(-amount,0))
         self.set_iFrames(15)
+        self.__damage_frames = 5
+        if self.game: self.game.particles.add(DamageParticle(amount,self.pos.addVec(Vector2D(randint(-self.ABBox[0]/2,self.ABBox[0]/2),randint(-self.ABBox[1]/2,self.ABBox[1]/2)))))
         return True
 
     def heal(self,amount):

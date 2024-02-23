@@ -22,6 +22,16 @@ class Entity(Object):
         if img == None:
             img = Images.default()
         self.image = img
+        c = self.image.copy()
+        paint = QPainter(c)
+        mask = QBitmap(c.createAlphaMask())
+        paint.setClipRegion(QRegion(mask))
+        paint.setPen(QColor(0,0,0,0))
+        paint.setBrush(QColor(0,0,0,200))
+        paint.drawRect(QRectF(0,0,128,128))
+        self.image_dark = c
+        self.game = None
+            
 
 
         # Animation
@@ -63,6 +73,7 @@ class Entity(Object):
 
 
     def update(self,game:Widget):
+        self.game = game
         self.list()
         self.tick += 1 #Updates current tick
         self.updateMovement(game)
@@ -118,7 +129,9 @@ class Entity(Object):
     def drawSelf(self,game): #This function renders the entity. Gets the screen, obtains the PyQt6 Painter to draw to it, draws a picture at the current position, minus the camera to move based on camera and draws this image.
         # t = QtGui.QTransform()
         # t.rotate(self.pos.R)
-        img = self.getImage()#.transformed(t)
+        #.transformed(t)
+        img = self.getImage()
+        
         p:QPainter = game.rScreen.getThisPainter()
         p.translate(self.pos.subtractPoint(game.camera.pos()))
         p.drawImage(centerImage(QPoint(0,0),self.shadow),self.shadow)
@@ -133,7 +146,13 @@ class Entity(Object):
 
 
     def getImage(self): # Override this function in other entities to allow modification of the image, or for animations.
-        return self.image.copy()
+        t = self.game.currentLevel.tileMap().getTile(self.pos.x(),self.pos.y())
+        if t:
+            if not t.light():
+                return self.getImageDark()
+        return self.image
+    def getImageDark(self):
+        return self.image_dark
     
 
     def delete(self):

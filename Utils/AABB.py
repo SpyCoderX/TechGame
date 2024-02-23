@@ -100,10 +100,10 @@ class AABBBranch(AABB):
                 else:
                     self.right.add(AB,obj)
     
-    def remove(self,obj,upper):
-        if self.left: self.left.remove(obj,self)
-        if self.right: self.right.remove(obj,self)
-        
+    def remove(self,obj):
+        if self.left: self.left.remove(obj)
+        if self.right: self.right.remove(obj)
+        return
 
     def recalcDown(self,upper):
         if isinstance(self.left,AABBBranch): self.left.recalcDown(self)
@@ -156,11 +156,11 @@ class AABBLeaf(AABB):
         super().__init__(AB.rect[0],AB.rect[1])
         self.obj = obj
         self.upper = upper
-    def remove(self,obj,upper):
+    def remove(self,obj):
         if self.obj==obj:
-            if upper.left==self: upper.left = None
-            if upper.right==self: upper.right = None
-            upper.recalcUp()
+            if self.upper.left==self: self.upper.left = None
+            if self.upper.right==self: self.upper.right = None
+            self.upper.recalcUp()
             
     def draw(self, screen):
         super().draw(screen)
@@ -208,7 +208,7 @@ class AABBTree(AABBBranch):
             if self.right:
                 self.setLeft(self.left)
     def remove(self, obj):
-        return super().remove(obj,self)
+        return super().remove(obj)
     
         
    
