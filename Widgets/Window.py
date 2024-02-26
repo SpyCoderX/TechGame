@@ -36,5 +36,7 @@ class BaseW(QMainWindow,Base.Widget):
         self.cscreen.events.append({"type":"Keydown","key":a0.key()})
     def keyReleaseEvent(self, a0: QKeyEvent) -> None:
         self.cscreen.events.append({"type":"Keyup","key":a0.key()})
+    def wheelEvent(self, a0: QtGui.QWheelEvent) -> None:
+        self.cscreen.events.append({"type":"Scroll","val":a0.angleDelta()})
     
     

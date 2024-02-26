@@ -30,7 +30,7 @@ class BaseEnemy(LivingEntity):
             self.acceleration = self.acceleration.addVec(QPointF(math.cos(dir)*0.2,math.sin(dir)*0.2))
         return super().updateAcceleration(game)
     def death(self):
-        item = Item(ItemStack(MATERIALS.getMaterial("HMMMF"),1))
+        item = Item(ItemStack(MATERIALS.STICK,1))
         item.pos = self.pos
         self.list().add_entity(item)
     

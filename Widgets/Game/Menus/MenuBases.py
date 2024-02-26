@@ -1,11 +1,12 @@
 from Widgets.Base import Widget
 from PyQt6.QtGui import QImage, QPaintEvent,QPainter,QColor, QRegion, QBitmap
 from PyQt6.QtCore import QRectF,QPointF,QSizeF,Qt
-from Utils.Numbers import centerImage
+from Utils.Numbers import centerImage,cnvrtLstToQPntF
 from Utils.AABB import AABBTree,AABB
 from Utils.Images import load
+from Vars.GLOBAL_VARS import GUI_SCALE as SCALE
+from Widgets.Game.Item.Item import MATERIALS,PickaxeMaterial,WeaponMaterial
 import math
-SCALE = 8
 class Menu(Widget):
     Game = None
     def __init__(self) -> None:
@@ -27,6 +28,8 @@ class Menu(Widget):
         painter.setPen(QColor(0,0,0,0))
         painter.setBrush(QColor(0,0,0,100))
         painter.drawRect(self.geometry())
+    def remove(self):
+        self.Game.GUIs.removeWidget(self)
 class InventoryGUI(Menu):
     def __init__(self,inventory,game) -> None:
         super().__init__()
@@ -58,28 +61,52 @@ class InventoryGUI(Menu):
         super().update()
         self.updateBackground()
         self.updateSlots()
-    
+def scaleBySCALE(image):
+    return image.scaled(image.width()*SCALE,image.height()*SCALE)
 PLAYER_INV_IMAGE = load("Player_GUI")
-PLAYER_INV_IMAGE = PLAYER_INV_IMAGE.scaled(PLAYER_INV_IMAGE.width()*SCALE,PLAYER_INV_IMAGE.height()*SCALE)
+PLAYER_INV_IMAGE = scaleBySCALE(PLAYER_INV_IMAGE)
+PLAYER_TOOL_INV_IMAGE = load("PlayerToolGUI")
+PLAYER_TOOL_INV_IMAGE = scaleBySCALE(PLAYER_TOOL_INV_IMAGE)
+PLAYER_VIEW_OVERLAY_IMAGE = load("PlayerViewGUI")
+PLAYER_VIEW_OVERLAY_IMAGE = scaleBySCALE(PLAYER_VIEW_OVERLAY_IMAGE)
+
+
 class PlayerInventoryGUI(InventoryGUI):
     def __init__(self, inventory,game) -> None:
         super().__init__(inventory,game)
+        self.tick = 0
     def createSlots(self):
         for x in range(len(self.Inventory.slots())):
-            self.createSlot(Slot([(x%5)*(SCALE*16+16)-(SCALE*16+16)*2,math.floor(x/5)*(SCALE*16+16)-(SCALE*8+8)*3],[SCALE*16,SCALE*16],x,self))
+            self.createSlot(Slot([(x%5)*(SCALE*16+16)-(SCALE*16+16)*2,math.floor(x/5)*(SCALE*16+16)-(SCALE*8+8)*6],[SCALE*16,SCALE*16],x,self))
+        for x in range(len(self.Inventory.toolSlots())):
+            def getToolStack(i):
+                return self.Inventory.getToolStack(i)
+            def setToolStack(i,st):
+                return self.Inventory.setToolStack(i,st)
+            s = Slot([(x)*(SCALE*16+16)-(SCALE*16+16)*2,(SCALE*16+16)*2],[SCALE*16,SCALE*16],x,self,PickaxeMaterial if x == 1 else WeaponMaterial)
+            s.getInventoryItemStack = getToolStack
+            s.setInventoryItemStack = setToolStack
+            self.createSlot(s)
     def renderBackground(self):
+        self.tick+=1
         paint = self.getThisPainter()
-        paint.drawImage(QRectF(centerImage(QPointF(self.Game.rScreen.width()/2,self.Game.rScreen.height()/2),PLAYER_INV_IMAGE),QSizeF(PLAYER_INV_IMAGE.size())),PLAYER_INV_IMAGE)
+        paint.drawImage(QRectF(centerImage(QPointF(self.Game.rScreen.width()/2,self.Game.rScreen.height()/2-(SCALE*16+16)*1.5),PLAYER_INV_IMAGE),QSizeF(PLAYER_INV_IMAGE.size())),PLAYER_INV_IMAGE)
+        paint.drawImage(QRectF(centerImage(QPointF(self.Game.rScreen.width()/2-(SCALE*16+16)*1.5,self.Game.rScreen.height()/2+(SCALE*16+16)*2),PLAYER_TOOL_INV_IMAGE),QSizeF(PLAYER_TOOL_INV_IMAGE.size())),PLAYER_TOOL_INV_IMAGE)
+        paint.drawImage(QRectF(centerImage(QPointF(self.Game.rScreen.width()/2+(SCALE*16+16)*4.5,self.Game.rScreen.height()/2-(SCALE*16+16)*3.2),PLAYER_VIEW_OVERLAY_IMAGE),QSizeF(PLAYER_VIEW_OVERLAY_IMAGE.size())),PLAYER_VIEW_OVERLAY_IMAGE)
+        paint.translate(QPointF(self.Game.rScreen.width()/2+(SCALE*16+16)*4.5,self.Game.rScreen.height()/2-(SCALE*16+16)*3.2))
+        paint.drawImage(QRectF(centerImage(QPointF(0,0),PLAYER_VIEW_OVERLAY_IMAGE),QSizeF(PLAYER_VIEW_OVERLAY_IMAGE.size())),PLAYER_VIEW_OVERLAY_IMAGE)
+        paint.rotate(self.tick)
+        paint.drawImage(QRectF(centerImage(QPointF(0,0),self.Game.Player.getImage()),QSizeF(self.Game.Player.getImage().size())),self.Game.Player.getImage())
+        paint.rotate(-self.tick)
     def renderSlots(self):
         super().renderSlots()
         paint = self.getThisPainter()
         pos = self.Game.rScreen.mousePos()
         if self.Inventory.mouseSlot(): 
-            paint.drawImage(QRectF(QPointF(pos.x()-SCALE*15*0.5,pos.y()-SCALE*16*0.5),QSizeF(SCALE*16,SCALE*16)),self.Inventory.mouseSlot().getMaterial().getImage())
-            paint.scale(4,4)
-            paint.setPen(QColor(200,200,200,255))
-            paint.drawText(QPointF((pos.x()-SCALE*15*0.5-8)/4,(pos.y()+SCALE*16*0.5)/4),str(self.Inventory.mouseSlot().getCount()))
-            
+            self.Inventory.mouseSlot().render(paint,pos,QSizeF(16,16),1)
+    
+
+    
 class Inventory:
     __Slots = []
     __Size = 0
@@ -98,6 +125,7 @@ class Inventory:
         if slot>=len(self.__Slots): return None
         self.__Slots[slot] = itemStack
     def add(self,itemStack):
+        itemStack = itemStack.clone()
         x = 0
         for slot in self.__Slots:
             if itemStack.getCount()<1:
@@ -111,12 +139,12 @@ class Inventory:
                     itemStack.setCount(overflow)
             else:
                 if itemStack.getCount()>itemStack.getMaterial().getStacksize():
-                    stack = itemStack.copy()
+                    stack = itemStack.clone()
                     stack.setCount(stack.getMaterial().getStacksize())
                     self.__Slots[x] = stack
                     itemStack.setCount(itemStack.getCount()-itemStack.getMaterial().getStacksize())
                 else:
-                    self.__Slots[x] = itemStack
+                    self.__Slots[x] = itemStack.clone()
                     return True
             x+=1
         return False
@@ -138,13 +166,29 @@ class Inventory:
             self.__Slots = [None for x in range(len(self.__Slots))]
 class PlayerInventory(Inventory):
     __mouse = None
+    __ToolSlots = [None,None]
+    __ArmorSlots = [None,None,None,None]
     def __init__(self) -> None:
         super().__init__("Inventory",20)
     def mouseSlot(self):
         return self.__mouse
     def setMouseSlot(self,itemStack):
         self.__mouse = itemStack
+
+    def toolSlots(self):
+        return self.__ToolSlots.copy()
+    def setToolStack(self,index,stack):
+        self.__ToolSlots[index] = stack
+    def getToolStack(self,index):
+        return self.__ToolSlots[index]
     
+    def armorSlots(self):
+        return self.__ArmorSlots.copy()
+    def setArmorStack(self,index,stack):
+        self.__ArmorSlots[index] = stack
+    def getArmorStack(self,index):
+        return self.__ArmorSlots[index]
+
     
 SLOT_IMAGE = load("Slot")
 SLOT_IMAGE = SLOT_IMAGE.scaled(SLOT_IMAGE.width()*SCALE,SLOT_IMAGE.height()*SCALE)
@@ -162,11 +206,13 @@ class Slot:
     __Index = 0
     __Inventory = None
     __Pressed = False
-    def __init__(self,pos:list,size:list,index,inv) -> None:
+    __RequiredItemType = None
+    def __init__(self,pos:list,size:list,index,inv,item_type=None) -> None:
         self.setPos(pos)
         self.setSize(size)
         self.setIndex(index)
         self.setInventory(inv)
+        self.setRequiredItemType(item_type)
         self.hovered = False
     # Position
     def setPos(self,pos:list):
@@ -174,7 +220,10 @@ class Slot:
         return self
     def pos(self):
         return self.__Pos
-    
+    def setRequiredItemType(self,type):
+        self.__RequiredItemType = type
+    def requiredItemType(self):
+        return self.__RequiredItemType
     # MouseSlot - Extend from Player's Inventory
     def setMouseSlot(self,itemStack):
         self.inventory().Game.Player.inventory.setMouseSlot(itemStack)
@@ -182,10 +231,17 @@ class Slot:
     def mouseSlot(self):
         return self.inventory().Game.Player.inventory.mouseSlot()
     
+    # Inventory's ItemStack
+    def getInventoryItemStack(self,index):
+        return self.inventory().Inventory.get(index)
+    def setInventoryItemStack(self,index,stack):
+        self.inventory().Inventory.set(index,stack)
+
+
     # ItemStack
     def setItemStack(self,itemStack):
         self.__ItemStack = itemStack
-        self.inventory().Inventory.set(self.index(),self.__ItemStack)
+        self.setInventoryItemStack(self.index(),itemStack)
     def itemStack(self):
         return self.__ItemStack
     
@@ -217,8 +273,8 @@ class Slot:
     # Update
     def update(self,inventory):
         self.setInventory(inventory)
-        if inventory.Inventory.get(self.index())!=self.itemStack():
-            self.__ItemStack = inventory.Inventory.get(self.index())
+        if self.getInventoryItemStack(self.index())!=self.itemStack():
+            self.__ItemStack = self.getInventoryItemStack(self.index())
         pos = inventory.Game.rScreen.mousePos()
         colls = inventory.tree.getCollisions(AABB([pos.x(),pos.y()],[pos.x()+1,pos.y()+1]))
         objs = [obj.obj for obj in colls]
@@ -227,7 +283,10 @@ class Slot:
         else:
             self.hovered = False
         if inventory.Game.rScreen.mouseButton(0) or inventory.Game.rScreen.mouseButton(2):
-            if inventory.Game.rScreen.mouseButton(0):
+            v = True # Boolean Value for a check
+            if self.mouseSlot() and self.requiredItemType():
+                v = isinstance(self.mouseSlot().getMaterial(),self.requiredItemType())
+            if inventory.Game.rScreen.mouseButton(0) and v:
                 if not self.__Pressed and self.hovered:
                     item = self.itemStack()
                     if self.mouseSlot():
@@ -250,7 +309,7 @@ class Slot:
                     else:
                         self.setItemStack(self.mouseSlot())
                         self.setMouseSlot(item)
-            else:
+            elif v:
                 if not self.__Pressed and self.hovered:
                     item = self.itemStack()
                     
@@ -290,8 +349,4 @@ class Slot:
         paint.translate(pos)
         paint.drawImage(QRectF(QPointF(self.pos()[0]-self.size()[0]/2,self.pos()[1]-self.size()[1]/2),QSizeF(self.size()[0],self.size()[0])),SLOT_IMAGE_HOVER if self.hovered else SLOT_IMAGE)
         if self.itemStack(): 
-            paint.drawImage(QRectF(QPointF(self.pos()[0]-self.size()[0]*0.4,self.pos()[1]-self.size()[1]*0.4),QSizeF(self.size()[0]*0.8,self.size()[1]*0.8)),self.itemStack().getMaterial().getImage())
-            paint.scale(4,4)
-            paint.setPen(QColor(200,200,200,255))
-            paint.drawText(QPointF((self.pos()[0]-self.size()[0]*0.4-8)/4,(self.pos()[1]+self.size()[1]*0.4)/4),str(self.itemStack().getCount()))
-            
+            self.itemStack().render(paint,cnvrtLstToQPntF(self.pos()),QSizeF(16,16),0.8)

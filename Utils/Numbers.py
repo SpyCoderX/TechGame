@@ -6,8 +6,8 @@ from PyQt6.QtGui import QVector2D
 from Vars.GLOBAL_VARS import SIZE
 import math
 
-def centerImage(Point:QPoint,Image:QImage):
-    return QPointF(Point.x()-Image.width()/2,Point.y()-Image.height()/2)
+def centerImage(Point:QPoint,Image:QImage,scale=1):
+    return QPointF(Point.x()-Image.width()*(0.5*scale),Point.y()-Image.height()*(0.5*scale))
 
 def cnvrtLstToQPntF(list): #Convert List To QPointF (Convert Cnvrt, List Lst, To To, QPointF QPntf)
     return QPointF(list[0],list[1])

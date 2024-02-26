@@ -48,10 +48,10 @@ class DamageParticle(Particle):
         img = QImage(len(str(amount))*10+10,30,QImage.Format.Format_ARGB32)
         img.fill(QColor(0,0,0,0))
         paint = QPainter(img)
-        paint.drawText(QPointF(12,12),"-"+str(self.__Amount))
+        paint.drawText(QPointF(12,12),str(self.__Amount))
         paint.setPen(QColor(255,0,0,255))
         paint.setBrush(QColor(255,0,0,255))
-        paint.drawText(QPointF(10,10),"-"+str(self.__Amount))
+        paint.drawText(QPointF(10,10),str(self.__Amount))
         super().__init__(img,"damage",pos,30)
     def clone(self,amount):
         return DamageParticle(amount,self.getPos())

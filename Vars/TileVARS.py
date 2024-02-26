@@ -10,3 +10,6 @@ SOLID = 1
 # Tile Connection Mode
 NO_CONNECTION = 0
 CONNECTIONS = 1
+
+FILE_PREFIX = "Tile_"
+

@@ -1,12 +1,13 @@
 from .Tile import Tile,TileBuilder
 from Utils.Images import load,default
+from Utils.Numbers import addPoints
 import math
 from PyQt6.QtCore import QRect, QPoint,QPointF
 from typing import List
-from .TileVARS import *
+from Vars.TileVARS import *
 from .TileHelp import TileReg
 from Vars.GLOBAL_VARS import SIZE
-
+from Widgets.Game.Item.Item import MATERIALS
 import json
 import os
 
@@ -46,14 +47,14 @@ def SaveTileMap(map,name):
     for y in range(len(tiles)):
         map_list.append([])
         for x in range(len(tiles[0])):
-            map_list[y].append({"id":tiles[y][x].ID(),"floor":tiles[y][x].floorID()})
+            map_list[y].append({"id":tiles[y][x].ID(),"floor":tiles[y][x].floorMaterial()})
 
     json.dump({"spawn":spawn,"map":map_list},file)
     file.close()
 
 class TileMap: # An object that holds all tiles.
     def __init__(self,sizew,sizeh) -> None: # Init
-        self.__TILES = [[Tile(self,"air","air") for x in range(sizew)] for y in range(sizeh)] # Setup an empty TileMap/list.
+        self.__TILES = [[Tile(self,None,None) for x in range(sizew)] for y in range(sizeh)] # Setup an empty TileMap/list.
         self.__spawn = ((math.ceil(sizew/2)-1)*SIZE,(math.ceil(sizeh/2)-1)*SIZE) # Spawn location for this TileMap.
         self.__updates = [] # Objects to update. (Coming soon)
         self.fixLighting()
@@ -72,6 +73,14 @@ class TileMap: # An object that holds all tiles.
         for y in range(r[0][1],r[1][1]):
             for x in range(r[0][0],r[1][0]):
                 self.tile(x,y).update(game)
+        if game.rScreen.mouseButton(0):
+            mpos:QPointF = addPoints(game.rScreen.mousePos(),game.camera.pos())
+            hover_tile = self.getTile(mpos.x(),mpos.y())
+            game.Player.breaking_tile = hover_tile
+            if hover_tile.material()!=MATERIALS.AIR:
+                hover_tile.applyMine(game)
+        else:
+            game.Player.breaking_tile = None
         
         
     def render(self,game):
@@ -110,7 +119,7 @@ class TileMap: # An object that holds all tiles.
     def setTiles(self,tiles:List[List[Tile]]):
         sx = len(tiles[0])
         sy = len(tiles)
-        self.__TILES = [[Tile(self,"air","air") for x in range(max(1,sx))] for y in range(max(1,sy))] # Setup an empty TileMap/list.
+        self.__TILES = [[Tile(self,None,None) for x in range(max(1,sx))] for y in range(max(1,sy))] # Setup an empty TileMap/list.
         for y in range(sy):
             for x in range(sx):
                 self.setTile(tiles[y][x],[x,y],False)
@@ -173,7 +182,7 @@ class TileMap: # An object that holds all tiles.
     # Check if the tile at x,y connects to the tile
     def tileConnection(self,x,y,tile):
         t = self.tile(x,y)
-        return tile.connectionMode()==CONNECTIONS and t.ID()==tile.ID() and t.connectionMode()==CONNECTIONS
+        return tile.connectionMode()==CONNECTIONS and t.material()==tile.material() and t.connectionMode()==CONNECTIONS
     def tile(self,x,y): # Gets a tile using the coords of Tiles in the list.
         if self.isInRange(x,y):
             return self.__TILES[y][x]
@@ -198,7 +207,7 @@ class TileMap: # An object that holds all tiles.
         for y in range(len(self.__TILES)):
             for x in range(len(self.__TILES[0])):
                 t = self.__TILES[y][x]
-                t.setFloorID(floor_ID)
+                t.setFloorMaterial(floor_ID)
                 t.setLight(1)
                 self.setTile(t,(x,y),False)
         self.fixLighting()
