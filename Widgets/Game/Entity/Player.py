@@ -39,7 +39,7 @@ class Player(LivingEntity):
     def setTool(self,tool):
         return self.inventory.setToolStack(self.selected_slot,tool) if self.selected_slot<2 else self.inventory.set(self.selected_slot-2,tool)
     def isAttackMode(self):
-        return isinstance(self.getTool().getMaterial(),WeaponMaterial)
+        return isinstance(self.getTool().getMaterial(),WeaponMaterial) if self.getTool() else False
     def update(self, game: Widget):
         self.setList(game.currentLevel.entitylist())
         if game.rScreen.mouseButton(0) and not self.__isSwinging and self.__swing_cooldown==0 and self.isAttackMode():
