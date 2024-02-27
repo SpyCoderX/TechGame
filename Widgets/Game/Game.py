@@ -108,6 +108,20 @@ class MainGame(ScreenController):
                 else:
                     self.__PlayerInvGui = PlayerInventoryGUI(self.Player.inventory,self)
                     self.GUIs.addWidget(self.__PlayerInvGui)
+            if key == Qt.Key.Key_1:
+                self.Player.selected_slot = 0
+            if key == Qt.Key.Key_2:
+                self.Player.selected_slot = 1
+            if key == Qt.Key.Key_3:
+                self.Player.selected_slot = 2
+            if key == Qt.Key.Key_4:
+                self.Player.selected_slot = 3
+            if key == Qt.Key.Key_5:
+                self.Player.selected_slot = 4
+            if key == Qt.Key.Key_6:
+                self.Player.selected_slot = 5
+            if key == Qt.Key.Key_7:
+                self.Player.selected_slot = 6
             
 
 
