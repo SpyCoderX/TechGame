@@ -190,7 +190,14 @@ class MainGame(ScreenController):
         p = self.rScreen.getThisPainter()
         p.setPen(QColor(255,255,255,255))
         p.drawText(10,(self.rScreen.height()-20),100,30,0,"v1.0 - Tech-Game")
-        p.drawText(self.rScreen.width()-130,(self.rScreen.height()-120),130,120,0,"Keys:\n├[WASD] - Movement\n├[Y/H] - Darkness\n├[T/G] - Block\n├[U] - Spawn Entity\n├[Z] - Toggle Vignette\n└[Left Click] - Sword")
+        s = """Keys:
+├[WASD] - Movement
+├[Y/H] - Darkness
+├[T/G] - Block
+├[U] - Spawn Entity
+├[E] - Open/Close Inventory
+└[Z] - Toggle Vignette"""
+        p.drawText(QRect(int(self.rScreen.width()-160),int(self.rScreen.height()-140),300,300),0,s)
         p.drawImage(QRectF(Numbers.centerImage(QPointF(self.rScreen.width()*0.3,self.rScreen.height()-PLAYER_TOOL_OVERLAY_IMAGE.height()/2),PLAYER_TOOL_OVERLAY_IMAGE),QSizeF(PLAYER_TOOL_OVERLAY_IMAGE.size())),PLAYER_TOOL_OVERLAY_IMAGE)
         p.drawImage(QRectF(Numbers.centerImage(QPointF(self.rScreen.width()*0.6,self.rScreen.height()-PLAYER_INV_OVERLAY_IMAGE.height()/2),PLAYER_INV_OVERLAY_IMAGE),QSizeF(PLAYER_INV_OVERLAY_IMAGE.size())),PLAYER_INV_OVERLAY_IMAGE)
         if self.Player.selected_slot<2:
